@@ -35,11 +35,9 @@ body{display:flex;flex-direction:column;overflow:hidden}
   display:flex;align-items:center;justify-content:space-between;
   box-shadow:0 2px 12px rgba(0,0,0,.35);flex-shrink:0;z-index:20
 }
-.hdr-brand{display:flex;align-items:center;gap:12px}
-.brand-inf svg{width:44px;height:40px;flex-shrink:0}
-.brand-inf-text{display:flex;flex-direction:column;line-height:1}
-.brand-inf-name{font-size:18px;font-weight:800;letter-spacing:1px;color:#fff;font-style:italic}
-.brand-inf-sub{font-size:9.5px;letter-spacing:2px;color:rgba(255,255,255,.45);text-transform:uppercase;margin-top:3px;font-weight:500}
+.hdr-brand{display:flex;align-items:center}
+.brand-inf img{display:block}
+.brand-inf-sub{font-size:9.5px;letter-spacing:2px;color:rgba(255,255,255,.45);text-transform:uppercase;font-weight:500}
 
 .hdr-center{position:absolute;left:50%;transform:translateX(-50%);text-align:center}
 .hdr-title{font-size:15px;font-weight:700;color:#fff;letter-spacing:.3px}
@@ -399,30 +397,9 @@ body{display:flex;flex-direction:column;overflow:hidden}
 <!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
 <header class="hdr">
   <div class="hdr-brand">
-    <div class="brand-inf" style="display:flex;align-items:center;gap:12px">
-      <!-- Infinite logo mark: triangle + teal stripes + swoosh -->
-      <svg viewBox="0 0 100 92" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <clipPath id="tc">
-            <polygon points="50,2 98,86 2,86"/>
-          </clipPath>
-        </defs>
-        <!-- Blue triangle -->
-        <polygon points="50,2 98,86 2,86" fill="#1578C8"/>
-        <!-- Three teal diagonal stripes clipped inside triangle -->
-        <g clip-path="url(#tc)">
-          <line x1="14" y1="96" x2="70" y2="-4" stroke="#2DD4BF" stroke-width="10" stroke-linecap="butt"/>
-          <line x1="30" y1="96" x2="86" y2="-4" stroke="#2DD4BF" stroke-width="10" stroke-linecap="butt"/>
-          <line x1="46" y1="96" x2="102" y2="-4" stroke="#2DD4BF" stroke-width="10" stroke-linecap="butt"/>
-        </g>
-        <!-- Teal orbital swoosh at base -->
-        <ellipse cx="50" cy="86" rx="48" ry="7" fill="none" stroke="#2DD4BF" stroke-width="4"
-                 stroke-dasharray="165 55" stroke-dashoffset="28" stroke-linecap="round"/>
-      </svg>
-      <div class="brand-inf-text">
-        <div class="brand-inf-name">infinite</div>
-        <div class="brand-inf-sub">Health Analytics</div>
-      </div>
+    <div class="brand-inf" style="display:flex;align-items:center;gap:10px">
+      <img src="assets/infinite-logo.png" alt="Infinite" style="height:46px;width:auto;display:block"/>
+      <div class="brand-inf-sub">Health Analytics</div>
     </div>
   </div>
 
