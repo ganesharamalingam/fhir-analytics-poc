@@ -1,531 +1,340 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Infinite Care Manager Dashboard</title>
-  <style>
-    /* ── Design Tokens ──────────────────────────────────────── */
-    :root {
-      --infinite-navy:       #0D1F3C;
-      --infinite-navy-mid:   #152a4e;
-      --infinite-blue:       #1A4B8C;
-      --infinite-accent:     #00A3E0;
-      --infinite-accent-dim: #0082b3;
-      --infinite-teal:       #00C6B8;
-      --surface:             #F4F6FA;
-      --surface-card:        #FFFFFF;
-      --border:              #DDE3EE;
-      --text-primary:        #0D1F3C;
-      --text-secondary:      #5A6B87;
-      --text-muted:          #8A96A8;
-      --risk-high:           #D93025;
-      --risk-high-bg:        #FDECEA;
-      --risk-med:            #E07B00;
-      --risk-med-bg:         #FEF3E2;
-      --risk-low:            #1A7F4B;
-      --risk-low-bg:         #E6F4EC;
-      --radius:              8px;
-      --shadow-sm:           0 1px 4px rgba(13,31,60,.08);
-      --shadow-md:           0 4px 16px rgba(13,31,60,.12);
-    }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FHIR Clinical Analytics Accelerator — Infinite</title>
+<style>
+  :root {
+    --navy:   #1B4774;
+    --blue1:  #014BBC;
+    --blue2:  #169AD2;
+    --teal:   #32D1E3;
+    --teal2:  #00B9A6;
+    --ltblue: #CBEAFA;
+    --white:  #FFFFFF;
+    --gray:   #F5F7FA;
+    --graymd: #44546A;
+    --red:    #C0392B;
+    --orange: #E67E22;
+    --green:  #27AE60;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #EEF2F7; color: #1a1a2e; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-    /* ── Reset & Base ───────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--surface); color: var(--text-primary); font-size: 14px; }
+  /* ── Header ── */
+  .header {
+    background: var(--navy);
+    padding: 0 32px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    flex-shrink: 0;
+  }
+  .header-left { display: flex; align-items: center; gap: 18px; }
+  .logo-box {
+    background: var(--white);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: 1px;
+  }
+  .logo-box span { color: var(--blue2); }
+  .header-title { color: var(--white); font-size: 15px; font-weight: 500; opacity: 0.9; }
+  .header-badge {
+    background: var(--teal2);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
 
-    /* ── App Shell ──────────────────────────────────────────── */
-    .app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+  /* ── Shell ── */
+  .app-body { display: flex; flex: 1; overflow: hidden; }
 
-    /* ── Top Navigation ─────────────────────────────────────── */
-    .topnav {
-      background: var(--infinite-navy);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 24px;
-      height: 56px;
-      flex-shrink: 0;
-      box-shadow: 0 2px 8px rgba(0,0,0,.25);
-      z-index: 10;
-    }
-    .topnav-brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .topnav-logo {
-      width: 32px;
-      height: 32px;
-      background: var(--infinite-accent);
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 16px;
-      letter-spacing: -1px;
-      color: #fff;
-      flex-shrink: 0;
-    }
-    .topnav-name {
-      font-size: 17px;
-      font-weight: 700;
-      letter-spacing: -0.3px;
-      color: #fff;
-    }
-    .topnav-name span { color: var(--infinite-accent); }
-    .topnav-module {
-      font-size: 12px;
-      color: rgba(255,255,255,.5);
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      margin-left: 4px;
-      padding-left: 12px;
-      border-left: 1px solid rgba(255,255,255,.15);
-    }
-    .topnav-user {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 13px;
-      color: rgba(255,255,255,.75);
-    }
-    .topnav-avatar {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      background: var(--infinite-blue);
-      border: 2px solid rgba(255,255,255,.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 600;
-      color: #fff;
-    }
+  /* ── Panel base ── */
+  .panel { background: var(--white); border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); overflow: hidden; }
+  .panel-header { background: var(--navy); color: white; padding: 12px 18px; font-size: 13px; font-weight: 600; letter-spacing: 0.3px; display: flex; align-items: center; gap: 8px; }
+  .panel-header .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); flex-shrink: 0; }
+  .panel-body { padding: 16px; }
 
-    /* ── Main Layout ────────────────────────────────────────── */
-    .main { display: flex; flex: 1; overflow: hidden; }
+  /* ── Left sidebar ── */
+  .sidebar {
+    width: 300px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--white);
+    border-right: 1px solid #DDE5F0;
+    overflow: hidden;
+  }
+  .sidebar-header {
+    background: var(--navy);
+    color: white;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    flex-shrink: 0;
+  }
+  .sidebar-header .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); }
+  .sidebar-search {
+    padding: 12px 14px;
+    border-bottom: 1px solid #E8EDF5;
+    flex-shrink: 0;
+  }
+  .sidebar-search input {
+    width: 100%;
+    padding: 7px 10px 7px 30px;
+    border: 1.5px solid #D0D7E5;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-family: inherit;
+    color: #1a1a2e;
+    background: var(--gray);
+    outline: none;
+    transition: border-color 0.2s;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%2344546A' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 9px center;
+  }
+  .sidebar-search input:focus { border-color: var(--blue2); }
 
-    /* ── Member List (Left Panel) ───────────────────────────── */
-    .panel-left {
-      width: 300px;
-      flex-shrink: 0;
-      background: var(--surface-card);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    .panel-left-header {
-      padding: 16px 18px 12px;
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-    .panel-left-header h2 {
-      font-size: 13px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      color: var(--text-secondary);
-      margin-bottom: 10px;
-    }
-    .search-box {
-      position: relative;
-    }
-    .search-box input {
-      width: 100%;
-      padding: 7px 10px 7px 32px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      font-size: 13px;
-      color: var(--text-primary);
-      background: var(--surface);
-      outline: none;
-      transition: border-color .15s;
-    }
-    .search-box input:focus { border-color: var(--infinite-accent); }
-    .search-box svg {
-      position: absolute;
-      left: 9px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-    }
-    .member-list { overflow-y: auto; flex: 1; }
-    .member-card {
-      padding: 14px 18px;
-      border-bottom: 1px solid var(--border);
-      cursor: pointer;
-      transition: background .12s;
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-    }
-    .member-card:hover { background: var(--surface); }
-    .member-card.active {
-      background: #EAF4FC;
-      border-left: 3px solid var(--infinite-accent);
-      padding-left: 15px;
-    }
-    .member-avatar {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      font-weight: 700;
-      color: #fff;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-    .avatar-high { background: #B0341C; }
-    .avatar-med  { background: #B06200; }
-    .avatar-low  { background: #1A6B40; }
+  .member-list { overflow-y: auto; flex: 1; }
+  .member-item {
+    padding: 14px 16px;
+    border-bottom: 1px solid #EEF2F7;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    transition: background 0.12s;
+  }
+  .member-item:hover { background: #F0F6FF; }
+  .member-item.active {
+    background: #EBF4FD;
+    border-left: 3px solid var(--blue2);
+    padding-left: 13px;
+  }
+  .m-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: white; flex-shrink: 0;
+  }
+  .av-high   { background: #9B2215; }
+  .av-medium { background: #A05A00; }
+  .av-low    { background: #1A6B40; }
 
-    .member-info { flex: 1; min-width: 0; }
-    .member-name {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-primary);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .member-demo {
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-top: 2px;
-    }
-    .member-dx {
-      font-size: 11.5px;
-      color: var(--text-muted);
-      margin-top: 4px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .risk-badge {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      padding: 3px 7px;
-      border-radius: 20px;
-      flex-shrink: 0;
-      margin-top: 2px;
-      text-transform: uppercase;
-    }
-    .risk-HIGH  { background: var(--risk-high-bg); color: var(--risk-high); }
-    .risk-MEDIUM { background: var(--risk-med-bg);  color: var(--risk-med); }
-    .risk-LOW   { background: var(--risk-low-bg);  color: var(--risk-low); }
+  .m-info { flex: 1; min-width: 0; }
+  .m-name { font-size: 13.5px; font-weight: 600; color: #1a1a2e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .m-demo { font-size: 11.5px; color: var(--graymd); margin-top: 2px; }
+  .m-dx   { font-size: 11px; color: #8A97A8; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .risk-pill {
+    font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px;
+    letter-spacing: 0.4px; text-transform: uppercase; flex-shrink: 0; margin-top: 2px;
+  }
+  .rp-HIGH   { background: #FDECEA; color: var(--red); }
+  .rp-MEDIUM { background: #FEF3E2; color: var(--orange); }
+  .rp-LOW    { background: #E8F5EE; color: #1A7A4A; }
 
-    /* ── Detail Panel (Right) ───────────────────────────────── */
-    .panel-right {
-      flex: 1;
-      overflow-y: auto;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
+  /* ── Right detail ── */
+  .detail-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
 
-    .detail-header {
-      display: flex;
-      align-items: flex-start;
-      gap: 18px;
-      background: var(--surface-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px 24px;
-      box-shadow: var(--shadow-sm);
-    }
-    .detail-avatar {
-      width: 58px;
-      height: 58px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      font-weight: 800;
-      color: #fff;
-      flex-shrink: 0;
-    }
-    .detail-identity { flex: 1; }
-    .detail-name {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--text-primary);
-      line-height: 1.2;
-    }
-    .detail-sub {
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-top: 4px;
-    }
-    .detail-meta {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
-      flex-wrap: wrap;
-    }
-    .meta-chip {
-      font-size: 12px;
-      padding: 4px 10px;
-      border-radius: 20px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
-    }
-    .detail-risk-block {
-      text-align: center;
-    }
-    .detail-risk-label {
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-    }
-    .detail-risk-badge {
-      font-size: 13px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      padding: 8px 18px;
-      border-radius: 24px;
-      text-transform: uppercase;
-    }
+  /* ── Member banner ── */
+  .member-banner {
+    background: var(--navy);
+    border-radius: 10px;
+    padding: 18px 22px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+  .banner-avatar {
+    width: 52px; height: 52px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 800; color: white; flex-shrink: 0;
+    border: 2px solid rgba(255,255,255,0.25);
+  }
+  .banner-identity { flex: 1; }
+  .banner-name { font-size: 20px; font-weight: 700; }
+  .banner-meta { font-size: 12.5px; opacity: 0.8; margin-top: 4px; }
+  .banner-meta span { margin-right: 16px; }
+  .banner-chips { display: flex; gap: 7px; margin-top: 9px; flex-wrap: wrap; }
+  .banner-chip {
+    font-size: 11px; padding: 3px 10px; border-radius: 14px;
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.85);
+  }
+  .banner-risk { text-align: center; flex-shrink: 0; }
+  .banner-risk-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.6; margin-bottom: 6px; }
+  .banner-risk-badge {
+    font-size: 14px; font-weight: 800; padding: 9px 20px;
+    border-radius: 24px; letter-spacing: 0.4px; text-transform: uppercase;
+  }
+  .risk-HIGH   { background: var(--red);    color: white; }
+  .risk-MEDIUM { background: var(--orange); color: white; }
+  .risk-LOW    { background: var(--green);  color: white; }
 
-    /* ── Section Grid ───────────────────────────────────────── */
-    .section-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-    }
-    .section-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  /* ── Score bar ── */
+  .score-section { margin-top: 10px; }
+  .score-label { font-size: 11px; color: rgba(255,255,255,0.6); margin-bottom: 5px; }
+  .score-bar-track { background: rgba(255,255,255,0.15); border-radius: 4px; height: 6px; width: 100%; }
+  .score-bar-fill  { height: 6px; border-radius: 4px; }
 
-    .card {
-      background: var(--surface-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-sm);
-      overflow: hidden;
-    }
-    .card-header {
-      padding: 12px 18px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: #FAFBFD;
-    }
-    .card-header-icon {
-      width: 22px;
-      height: 22px;
-      border-radius: 5px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .icon-blue   { background: #DCEEFB; color: var(--infinite-blue); }
-    .icon-teal   { background: #D4F5F3; color: #00897B; }
-    .icon-orange { background: #FEF0DC; color: #C97000; }
-    .icon-red    { background: #FDECEA; color: #C0392B; }
-    .icon-purple { background: #EDE7F6; color: #6A3BAF; }
-    .icon-green  { background: #E6F4EC; color: #1A7F4B; }
+  /* ── 2-column grid ── */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-full { grid-column: 1 / -1; }
 
-    .card-title {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-secondary);
-    }
-    .card-body { padding: 14px 18px; }
+  /* ── Section title ── */
+  .section-title { font-size: 12px; font-weight: 700; color: var(--navy); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 0.4px; }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--ltblue); }
 
-    /* ── Conditions list ────────────────────────────────────── */
-    .condition-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-    .condition-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 10px;
-      border-radius: 6px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-    }
-    .condition-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-    .dot-active   { background: var(--risk-high); }
-    .dot-managed  { background: var(--risk-med); }
-    .dot-resolved { background: var(--risk-low); }
-    .condition-name { font-size: 13px; font-weight: 500; flex: 1; }
-    .condition-since { font-size: 11px; color: var(--text-muted); }
-    .condition-status {
-      font-size: 10px;
-      padding: 2px 7px;
-      border-radius: 10px;
-      font-weight: 600;
-    }
-    .status-active   { background: var(--risk-high-bg); color: var(--risk-high); }
-    .status-managed  { background: var(--risk-med-bg);  color: var(--risk-med); }
+  /* ── Condition rows ── */
+  .cond-row { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 6px; background: var(--gray); border: 1px solid #E5EAF4; margin-bottom: 7px; }
+  .cond-row:last-child { margin-bottom: 0; }
+  .cond-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-active   { background: var(--red); }
+  .dot-managed  { background: var(--orange); }
+  .dot-resolved { background: var(--green); }
+  .cond-name { font-size: 12.5px; font-weight: 500; flex: 1; }
+  .cond-icd  { font-size: 11px; color: #8A97A8; font-family: Consolas, monospace; background: var(--ltblue); padding: 1px 6px; border-radius: 3px; }
+  .cond-since { font-size: 11px; color: #8A97A8; }
+  .cond-status {
+    font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px;
+  }
+  .cs-active   { background: #FDECEA; color: var(--red); }
+  .cs-managed  { background: #FEF3E2; color: var(--orange); }
 
-    /* ── Vitals ─────────────────────────────────────────────── */
-    .vitals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .vital-item {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 10px 12px;
-    }
-    .vital-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.4px; }
-    .vital-value { font-size: 18px; font-weight: 700; color: var(--text-primary); line-height: 1; }
-    .vital-unit  { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
-    .vital-flag  { font-size: 10px; font-weight: 700; margin-top: 4px; }
-    .flag-high   { color: var(--risk-high); }
-    .flag-ok     { color: var(--risk-low); }
+  /* ── Vitals grid ── */
+  .vitals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .vital-box { background: var(--gray); border: 1px solid #E5EAF4; border-radius: 6px; padding: 10px 12px; }
+  .vital-lbl { font-size: 10.5px; color: #8A97A8; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px; }
+  .vital-val { font-size: 20px; font-weight: 700; color: var(--navy); line-height: 1; }
+  .vital-unit { font-size: 10.5px; color: var(--graymd); margin-top: 2px; }
+  .vital-flag { font-size: 10.5px; font-weight: 700; margin-top: 4px; }
+  .vf-high { color: var(--red); }
+  .vf-ok   { color: var(--green); }
 
-    /* ── Medications ────────────────────────────────────────── */
-    .med-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
-    .med-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      padding: 8px 10px;
-      border-radius: 6px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-    }
-    .med-icon {
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
-      background: var(--infinite-blue);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      font-size: 13px;
-    }
-    .med-name { font-size: 13px; font-weight: 500; }
-    .med-dose { font-size: 11.5px; color: var(--text-secondary); margin-top: 2px; }
+  /* ── Medications ── */
+  .med-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; border-radius: 6px; background: var(--gray); border: 1px solid #E5EAF4; margin-bottom: 7px; }
+  .med-row:last-child { margin-bottom: 0; }
+  .med-icon-box {
+    width: 30px; height: 30px; border-radius: 6px; background: var(--blue1);
+    color: white; display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 800; flex-shrink: 0; letter-spacing: -0.5px;
+  }
+  .med-name { font-size: 12.5px; font-weight: 600; }
+  .med-dose-freq { font-size: 11.5px; color: var(--graymd); margin-top: 2px; }
 
-    /* ── Encounters ─────────────────────────────────────────── */
-    .encounter-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-    .encounter-item {
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      padding: 8px 10px;
-      border-radius: 6px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-    }
-    .encounter-date {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--infinite-accent-dim);
-      white-space: nowrap;
-      min-width: 68px;
-      padding-top: 1px;
-    }
-    .encounter-detail { flex: 1; }
-    .encounter-type { font-size: 13px; font-weight: 500; }
-    .encounter-note { font-size: 11.5px; color: var(--text-secondary); margin-top: 2px; }
+  /* ── Encounters ── */
+  .enc-row { display: flex; gap: 12px; align-items: flex-start; padding: 8px 10px; border-radius: 6px; background: var(--gray); border: 1px solid #E5EAF4; margin-bottom: 7px; }
+  .enc-row:last-child { margin-bottom: 0; }
+  .enc-date { font-size: 11px; font-weight: 700; color: var(--blue2); white-space: nowrap; min-width: 70px; padding-top: 1px; }
+  .enc-type { font-size: 12.5px; font-weight: 500; }
+  .enc-note { font-size: 11.5px; color: var(--graymd); margin-top: 2px; }
 
-    /* ── Care Gaps ──────────────────────────────────────────── */
-    .gap-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-    .gap-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 6px;
-      border: 1px solid;
-    }
-    .gap-open   { background: #FEF3E2; border-color: #F5C76E; }
-    .gap-closed { background: var(--risk-low-bg); border-color: #7BCDA0; }
-    .gap-icon { font-size: 15px; flex-shrink: 0; }
-    .gap-text { flex: 1; font-size: 13px; font-weight: 500; }
-    .gap-due  { font-size: 11px; color: var(--text-muted); }
-    .gap-status-pill {
-      font-size: 10px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 12px;
-    }
-    .pill-open   { background: var(--risk-med-bg); color: var(--risk-med); }
-    .pill-closed { background: var(--risk-low-bg); color: var(--risk-low); }
+  /* ── Care Gaps ── */
+  .gap-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 6px; border: 1px solid; margin-bottom: 7px; }
+  .gap-row:last-child { margin-bottom: 0; }
+  .gap-open-row   { background: #FEF8EE; border-color: #F5C76E; }
+  .gap-closed-row { background: #EBF6EE; border-color: #7BCDA0; }
+  .gap-icon { font-size: 14px; flex-shrink: 0; }
+  .gap-text { flex: 1; font-size: 12.5px; font-weight: 500; }
+  .gap-due  { font-size: 11px; color: var(--graymd); }
+  .gap-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; flex-shrink: 0;
+  }
+  .gb-open   { background: #FEF3E2; color: var(--orange); }
+  .gb-closed { background: #D5F5E3; color: #1A7A4A; }
 
-    /* ── Empty / No selection ───────────────────────────────── */
-    .empty-state {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-muted);
-      gap: 12px;
-    }
-    .empty-icon { font-size: 48px; opacity: .4; }
-    .empty-label { font-size: 14px; }
+  /* ── HEDIS table ── */
+  .hedis-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .hedis-table th { background: var(--navy); color: white; padding: 8px 12px; text-align: left; font-weight: 600; font-size: 11px; letter-spacing: 0.3px; }
+  .hedis-table td { padding: 8px 12px; border-bottom: 1px solid #EEF2F7; vertical-align: middle; }
+  .hedis-table tr:hover td { background: #F7FAFD; }
+  .measure-id { font-family: Consolas, monospace; font-size: 10.5px; background: var(--ltblue); color: var(--navy); padding: 2px 7px; border-radius: 4px; font-weight: 700; }
+  .gap-open   { background: #FADBD8; color: var(--red);   padding: 3px 10px; border-radius: 12px; font-size: 10.5px; font-weight: 700; white-space: nowrap; }
+  .gap-closed { background: #D5F5E3; color: #27AE60; padding: 3px 10px; border-radius: 12px; font-size: 10.5px; font-weight: 700; white-space: nowrap; }
 
-    /* ── Scrollbar ──────────────────────────────────────────── */
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-  </style>
+  /* ── Lab row ── */
+  .lab-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--gray); }
+  .lab-row:last-child { border: none; }
+  .lab-name { font-size: 12px; color: var(--graymd); }
+  .lab-val  { font-size: 13px; font-weight: 600; color: var(--navy); }
+
+  /* ── Empty state ── */
+  .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #A0AABB; padding: 60px 20px; text-align: center; }
+  .empty-icon { font-size: 52px; margin-bottom: 14px; opacity: 0.35; }
+  .empty-text { font-size: 14px; font-weight: 500; }
+  .empty-sub  { font-size: 12px; margin-top: 6px; }
+
+  /* ── Footer ── */
+  .footer { text-align: center; padding: 11px; font-size: 11px; color: #8899AA; border-top: 1px solid #DDE5F0; background: var(--white); flex-shrink: 0; }
+  .footer strong { color: var(--navy); }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #C8D2E0; border-radius: 10px; }
+</style>
 </head>
 <body>
-<div class="app">
 
-  <!-- Top Navigation -->
-  <nav class="topnav">
-    <div class="topnav-brand">
-      <div class="topnav-logo">Ix</div>
-      <div>
-        <span class="topnav-name">Infinite<span>Health</span></span>
-        <span class="topnav-module">Care Manager Dashboard</span>
-      </div>
+<!-- ── Header ──────────────────────────────────────────────────────── -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo-box">in<span>finite</span></div>
+    <div class="header-title">FHIR Clinical Analytics Accelerator</div>
+  </div>
+  <div class="header-badge">POC · EDA RFP · Elevance Health</div>
+</div>
+
+<!-- ── App Body ─────────────────────────────────────────────────────── -->
+<div class="app-body">
+
+  <!-- LEFT: Member List Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="dot"></div>My Panel
     </div>
-    <div class="topnav-user">
-      <div class="topnav-avatar">CM</div>
-      Care Manager
+    <div class="sidebar-search">
+      <input type="text" placeholder="Search members..." id="searchInput" oninput="filterMembers(this.value)" />
     </div>
-  </nav>
+    <div class="member-list" id="memberList"></div>
+  </aside>
 
-  <div class="main">
-    <!-- Left: Member List -->
-    <aside class="panel-left">
-      <div class="panel-left-header">
-        <h2>My Panel</h2>
-        <div class="search-box">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" placeholder="Search members..." id="searchInput" oninput="filterMembers(this.value)" />
-        </div>
-      </div>
-      <div class="member-list" id="memberList"></div>
-    </aside>
-
-    <!-- Right: Clinical Detail -->
-    <section class="panel-right" id="detailPanel">
-      <div class="empty-state">
-        <div class="empty-icon">&#x1F465;</div>
-        <div class="empty-label">Select a member to view their clinical summary</div>
-      </div>
-    </section>
+  <!-- RIGHT: Clinical Detail -->
+  <div class="detail-area" id="detailArea">
+    <div class="empty-state">
+      <div class="empty-icon">&#x2695;</div>
+      <div class="empty-text">No member selected</div>
+      <div class="empty-sub">Choose a member from the panel to view their clinical summary</div>
+    </div>
   </div>
 
+</div>
+
+<!-- ── Footer ──────────────────────────────────────────────────────── -->
+<div class="footer">
+  <strong>Infinite Computer Solutions</strong> · FHIR Clinical Analytics Accelerator · Prototype v1.0 · © 2026 Infinite Confidential
 </div>
 
 <script>
@@ -534,117 +343,117 @@ const MEMBERS = [
   {
     id: 1,
     name: "Carlos Ramirez",
-    age: 57,
-    sex: "M",
+    age: 57, sex: "M",
     risk: "HIGH",
     initials: "CR",
     dob: "1967-03-14",
     memberId: "INF-00441",
     pcp: "Dr. Anika Patel",
     plan: "Infinite Complete (HMO)",
-    primaryDx: "Type 2 Diabetes, Hypertension",
+    riskScore: 0.82,
+    primaryDx: "Type 2 Diabetes · Hypertension",
     conditions: [
-      { name: "Type 2 Diabetes Mellitus", icd: "E11.9", since: "2015", status: "active" },
-      { name: "Essential Hypertension",   icd: "I10",   since: "2013", status: "active" },
-      { name: "Diabetic Peripheral Neuropathy", icd: "E11.40", since: "2020", status: "managed" },
-      { name: "Hyperlipidemia",           icd: "E78.5", since: "2016", status: "managed" },
+      { name: "Type 2 Diabetes Mellitus",       icd: "E11.9",  since: "2015", status: "active" },
+      { name: "Essential Hypertension",          icd: "I10",    since: "2013", status: "active" },
+      { name: "Diabetic Peripheral Neuropathy",  icd: "E11.40", since: "2020", status: "managed" },
+      { name: "Hyperlipidemia",                  icd: "E78.5",  since: "2016", status: "managed" },
     ],
     vitals: [
-      { label: "Blood Pressure", value: "148/92", unit: "mmHg", flag: "high", flagText: "Elevated" },
-      { label: "HbA1c",          value: "8.4",    unit: "%",    flag: "high", flagText: "Above goal" },
-      { label: "BMI",            value: "31.2",   unit: "kg/m²",flag: "high", flagText: "Obese I" },
-      { label: "eGFR",           value: "61",     unit: "mL/min/1.73m²", flag: "ok", flagText: "G2 (Mild decrease)" },
+      { label: "Blood Pressure",  value: "148/92", unit: "mmHg",           flag: "high", flagText: "Elevated" },
+      { label: "HbA1c",           value: "8.4",    unit: "%",               flag: "high", flagText: "Above goal (>8%)" },
+      { label: "BMI",             value: "31.2",   unit: "kg/m²",           flag: "high", flagText: "Obese Class I" },
+      { label: "eGFR",            value: "61",     unit: "mL/min/1.73m²",  flag: "ok",   flagText: "G2 — Mild decrease" },
     ],
     medications: [
-      { name: "Metformin",    dose: "1000 mg", freq: "Twice daily", icon: "Mx" },
-      { name: "Lisinopril",   dose: "20 mg",   freq: "Once daily",  icon: "Li" },
-      { name: "Atorvastatin", dose: "40 mg",   freq: "Once daily at bedtime", icon: "At" },
-      { name: "Glipizide",    dose: "10 mg",   freq: "Twice daily with meals", icon: "Gx" },
-      { name: "Amlodipine",   dose: "5 mg",    freq: "Once daily",  icon: "Am" },
+      { name: "Metformin",             dose: "1000 mg",  freq: "Twice daily",              abbr: "MET" },
+      { name: "Lisinopril",            dose: "20 mg",    freq: "Once daily",               abbr: "LIS" },
+      { name: "Atorvastatin",          dose: "40 mg",    freq: "Once daily at bedtime",    abbr: "ATV" },
+      { name: "Glipizide",             dose: "10 mg",    freq: "Twice daily with meals",   abbr: "GLZ" },
+      { name: "Amlodipine",            dose: "5 mg",     freq: "Once daily",               abbr: "AML" },
     ],
     encounters: [
-      { date: "Feb 14, 2026", type: "PCP Office Visit", note: "HTN follow-up; BP still elevated, titrated Lisinopril" },
-      { date: "Dec 03, 2025", type: "Endocrinology",    note: "Diabetes management; HbA1c 8.4%, added Glipizide" },
-      { date: "Oct 22, 2025", type: "ED Visit",         note: "Hypoglycemic episode, resolved without admission" },
-      { date: "Aug 07, 2025", type: "Lab / Radiology",  note: "Annual labs, foot X-ray for neuropathy baseline" },
+      { date: "Feb 14, 2026", type: "PCP Office Visit",  note: "HTN follow-up; BP still elevated, Lisinopril titrated to 20 mg" },
+      { date: "Dec 03, 2025", type: "Endocrinology",     note: "Diabetes management; HbA1c 8.4%, Glipizide added" },
+      { date: "Oct 22, 2025", type: "ED Visit",          note: "Hypoglycemic episode, resolved without admission" },
+      { date: "Aug 07, 2025", type: "Lab / Radiology",   note: "Annual labs + foot X-ray for neuropathy baseline" },
     ],
-    careGaps: [
-      { text: "Diabetic Eye Exam",           due: "Overdue — last completed 2023",      status: "open" },
-      { text: "Nephrology Referral",         due: "Due — eGFR trending down",            status: "open" },
-      { text: "Flu Vaccine (2025–26)",       due: "Due this season",                     status: "open" },
-      { text: "Statin Therapy Adherence",    due: "Adherence confirmed Feb 2026",        status: "closed" },
+    hedis: [
+      { id: "CDC_HBA1C", name: "Diabetes: HbA1c Control (<8%)",         gap: "OPEN",   detail: "HbA1c 8.4% — above threshold",      signal: "LOINC 4548-4" },
+      { id: "CDC_BP",    name: "Diabetes: BP Control (<140/90)",         gap: "OPEN",   detail: "BP 148/92 mmHg — above threshold",  signal: "LOINC 8480-6 · 8462-4" },
+      { id: "CBP",       name: "Controlling High Blood Pressure",        gap: "OPEN",   detail: "BP 148/92 mmHg — above threshold",  signal: "LOINC 8480-6 · 8462-4" },
+      { id: "MED_PDC",   name: "Statin Medication Adherence (PDC ≥80%)", gap: "CLOSED", detail: "Atorvastatin active on file",        signal: "RxNorm statin codes" },
+      { id: "COL",       name: "Colorectal Cancer Screening",            gap: "OPEN",   detail: "No colonoscopy or FIT found",       signal: "CPT 45378-85 · 82274" },
     ],
   },
   {
     id: 2,
     name: "Linda Chen",
-    age: 63,
-    sex: "F",
+    age: 63, sex: "F",
     risk: "MEDIUM",
     initials: "LC",
     dob: "1962-09-28",
     memberId: "INF-00782",
     pcp: "Dr. Samuel Torres",
     plan: "Infinite Select (PPO)",
+    riskScore: 0.46,
     primaryDx: "Hypertension",
     conditions: [
-      { name: "Essential Hypertension", icd: "I10",   since: "2018", status: "managed" },
-      { name: "Osteoarthritis, knee",   icd: "M17.11",since: "2022", status: "managed" },
+      { name: "Essential Hypertension",  icd: "I10",    since: "2018", status: "managed" },
+      { name: "Osteoarthritis, Knee",    icd: "M17.11", since: "2022", status: "managed" },
     ],
     vitals: [
-      { label: "Blood Pressure", value: "132/82", unit: "mmHg", flag: "ok", flagText: "Near goal" },
-      { label: "BMI",            value: "27.8",   unit: "kg/m²",flag: "ok", flagText: "Overweight" },
-      { label: "Total Cholesterol", value: "196", unit: "mg/dL", flag: "ok", flagText: "Acceptable" },
-      { label: "eGFR",           value: "74",     unit: "mL/min/1.73m²", flag: "ok", flagText: "G2 (Normal)" },
+      { label: "Blood Pressure",    value: "132/82", unit: "mmHg",   flag: "ok",   flagText: "Near goal" },
+      { label: "BMI",               value: "27.8",   unit: "kg/m²",  flag: "ok",   flagText: "Overweight" },
+      { label: "Total Cholesterol", value: "196",    unit: "mg/dL",  flag: "ok",   flagText: "Acceptable" },
+      { label: "eGFR",              value: "74",     unit: "mL/min/1.73m²", flag: "ok", flagText: "G2 — Normal" },
     ],
     medications: [
-      { name: "Amlodipine",   dose: "10 mg",  freq: "Once daily",          icon: "Am" },
-      { name: "Hydrochlorothiazide", dose: "25 mg", freq: "Once daily",    icon: "Hz" },
-      { name: "Naproxen",     dose: "220 mg", freq: "PRN for joint pain",  icon: "Np" },
+      { name: "Amlodipine",          dose: "10 mg",  freq: "Once daily",           abbr: "AML" },
+      { name: "Hydrochlorothiazide", dose: "25 mg",  freq: "Once daily",           abbr: "HCT" },
+      { name: "Naproxen",            dose: "220 mg", freq: "PRN for joint pain",   abbr: "NPX" },
     ],
     encounters: [
-      { date: "Jan 28, 2026", type: "PCP Office Visit",  note: "Routine HTN check; BP well controlled on current regimen" },
-      { date: "Nov 11, 2025", type: "Orthopedics",       note: "Knee OA follow-up; conservative management, PT referral" },
-      { date: "Sep 05, 2025", type: "Lab / Radiology",   note: "Annual labs; all values within acceptable range" },
+      { date: "Jan 28, 2026", type: "PCP Office Visit",  note: "Routine HTN check; BP well controlled, regimen continued" },
+      { date: "Nov 11, 2025", type: "Orthopedics",       note: "Knee OA follow-up; conservative management, PT referral placed" },
+      { date: "Sep 05, 2025", type: "Lab / Radiology",   note: "Annual preventive labs — all values within acceptable range" },
     ],
-    careGaps: [
-      { text: "Colorectal Cancer Screening",  due: "Due — age-appropriate screening",     status: "open" },
-      { text: "Mammogram (2025)",             due: "Due — biennial schedule",              status: "open" },
-      { text: "Flu Vaccine (2025–26)",        due: "Administered Oct 2025",               status: "closed" },
-      { text: "Blood Pressure Monitoring",    due: "Patient self-monitoring — compliant",  status: "closed" },
+    hedis: [
+      { id: "CBP",  name: "Controlling High Blood Pressure",       gap: "CLOSED", detail: "BP 132/82 mmHg — within threshold",  signal: "LOINC 8480-6 · 8462-4" },
+      { id: "COL",  name: "Colorectal Cancer Screening",           gap: "OPEN",   detail: "No colonoscopy or FIT on file",      signal: "CPT 45378-85 · 82274" },
+      { id: "BCS",  name: "Breast Cancer Screening (Mammography)", gap: "OPEN",   detail: "No mammography found (due 2025)",    signal: "CPT 77067 · 77066 · 77065" },
     ],
   },
   {
     id: 3,
     name: "James Okafor",
-    age: 45,
-    sex: "M",
+    age: 45, sex: "M",
     risk: "LOW",
     initials: "JO",
     dob: "1980-06-05",
     memberId: "INF-01139",
     pcp: "Dr. Rachel Kim",
     plan: "Infinite Core (HMO)",
+    riskScore: 0.12,
     primaryDx: "No chronic conditions",
     conditions: [
       { name: "No active chronic conditions", icd: "Z00.00", since: "—", status: "managed" },
     ],
     vitals: [
-      { label: "Blood Pressure", value: "118/74", unit: "mmHg", flag: "ok", flagText: "Normal" },
-      { label: "BMI",            value: "24.1",   unit: "kg/m²",flag: "ok", flagText: "Normal" },
-      { label: "Total Cholesterol", value: "182", unit: "mg/dL", flag: "ok", flagText: "Optimal" },
-      { label: "Glucose (fasting)", value: "89",  unit: "mg/dL", flag: "ok", flagText: "Normal" },
+      { label: "Blood Pressure",    value: "118/74", unit: "mmHg",   flag: "ok", flagText: "Normal" },
+      { label: "BMI",               value: "24.1",   unit: "kg/m²",  flag: "ok", flagText: "Normal" },
+      { label: "Total Cholesterol", value: "182",    unit: "mg/dL",  flag: "ok", flagText: "Optimal" },
+      { label: "Fasting Glucose",   value: "89",     unit: "mg/dL",  flag: "ok", flagText: "Normal" },
     ],
     medications: [
-      { name: "No current medications", dose: "—", freq: "Preventive care only", icon: "—" },
+      { name: "No current medications", dose: "—", freq: "Preventive care only", abbr: "—" },
     ],
     encounters: [
       { date: "Nov 20, 2025", type: "Annual Wellness Exam", note: "All vitals normal; preventive labs ordered" },
       { date: "Oct 10, 2025", type: "Lab / Radiology",      note: "Preventive panel; cholesterol and glucose WNL" },
     ],
-    careGaps: [
-      { text: "Annual Wellness Visit (2026)", due: "Due — last Nov 2025 (schedule Nov 2026)", status: "closed" },
-      { text: "Flu Vaccine (2025–26)",        due: "Administered Oct 2025",                   status: "closed" },
+    hedis: [
+      { id: "AWV",  name: "Annual Wellness Visit",       gap: "CLOSED", detail: "Completed Nov 2025",            signal: "CPT G0438 · G0439" },
+      { id: "COL",  name: "Colorectal Cancer Screening", gap: "OPEN",   detail: "Due — age-appropriate (45+)",   signal: "CPT 45378-85 · 82274" },
     ],
   },
 ];
@@ -652,25 +461,25 @@ const MEMBERS = [
 // ── State ────────────────────────────────────────────────────────────────────
 let activeMemberId = null;
 
-// ── Render member list ───────────────────────────────────────────────────────
-function renderMemberList(filter = "") {
-  const list = document.getElementById("memberList");
-  const lower = filter.toLowerCase();
-  const filtered = MEMBERS.filter(m =>
+// ── Member list render ───────────────────────────────────────────────────────
+function renderMemberList(filter) {
+  const lower = (filter || "").toLowerCase();
+  const list  = document.getElementById("memberList");
+  const items = MEMBERS.filter(m =>
     m.name.toLowerCase().includes(lower) ||
     m.primaryDx.toLowerCase().includes(lower) ||
     m.risk.toLowerCase().includes(lower)
   );
 
-  list.innerHTML = filtered.map(m => `
-    <div class="member-card ${activeMemberId === m.id ? "active" : ""}" onclick="selectMember(${m.id})">
-      <div class="member-avatar avatar-${m.risk.toLowerCase()}">${m.initials}</div>
-      <div class="member-info">
-        <div class="member-name">${m.name}</div>
-        <div class="member-demo">${m.age}${m.sex} &middot; ID: ${m.memberId}</div>
-        <div class="member-dx">${m.primaryDx}</div>
+  list.innerHTML = items.map(m => `
+    <div class="member-item ${activeMemberId === m.id ? 'active' : ''}" onclick="selectMember(${m.id})">
+      <div class="m-avatar av-${m.risk.toLowerCase()}">${m.initials}</div>
+      <div class="m-info">
+        <div class="m-name">${m.name}</div>
+        <div class="m-demo">${m.age}${m.sex} &middot; ${m.memberId}</div>
+        <div class="m-dx">${m.primaryDx}</div>
       </div>
-      <span class="risk-badge risk-${m.risk}">${m.risk}</span>
+      <span class="risk-pill rp-${m.risk}">${m.risk}</span>
     </div>
   `).join("");
 }
@@ -682,147 +491,127 @@ function filterMembers(val) { renderMemberList(val); }
 function selectMember(id) {
   activeMemberId = id;
   renderMemberList(document.getElementById("searchInput").value);
-  const m = MEMBERS.find(x => x.id === id);
-  renderDetail(m);
+  renderDetail(MEMBERS.find(m => m.id === id));
 }
 
 // ── Render detail ────────────────────────────────────────────────────────────
 function renderDetail(m) {
-  const avatarClass = `avatar-${m.risk.toLowerCase()}`;
-  const riskClass   = `risk-${m.risk}`;
+  const tierColor = m.risk === 'HIGH' ? '#C0392B' : m.risk === 'MEDIUM' ? '#E67E22' : '#27AE60';
+  const openGaps  = m.hedis.filter(h => h.gap === 'OPEN').length;
 
   const conditionsHtml = m.conditions.map(c => `
-    <li class="condition-item">
-      <span class="condition-dot ${c.status === 'active' ? 'dot-active' : 'dot-managed'}"></span>
-      <span class="condition-name">${c.name} <small style="color:var(--text-muted)">(${c.icd})</small></span>
-      <span class="condition-since">Since ${c.since}</span>
-      <span class="condition-status ${c.status === 'active' ? 'status-active' : 'status-managed'}">${c.status}</span>
-    </li>
+    <div class="cond-row">
+      <span class="cond-dot ${c.status === 'active' ? 'dot-active' : 'dot-managed'}"></span>
+      <span class="cond-name">${c.name}</span>
+      <span class="cond-icd">${c.icd}</span>
+      <span class="cond-since">Since ${c.since}</span>
+      <span class="cond-status ${c.status === 'active' ? 'cs-active' : 'cs-managed'}">${c.status}</span>
+    </div>
   `).join("");
 
   const vitalsHtml = m.vitals.map(v => `
-    <div class="vital-item">
-      <div class="vital-label">${v.label}</div>
-      <div class="vital-value">${v.value}</div>
+    <div class="vital-box">
+      <div class="vital-lbl">${v.label}</div>
+      <div class="vital-val">${v.value}</div>
       <div class="vital-unit">${v.unit}</div>
-      <div class="vital-flag ${v.flag === 'high' ? 'flag-high' : 'flag-ok'}">${v.flagText}</div>
+      <div class="vital-flag ${v.flag === 'high' ? 'vf-high' : 'vf-ok'}">${v.flagText}</div>
     </div>
   `).join("");
 
   const medsHtml = m.medications.map(med => `
-    <li class="med-item">
-      <div class="med-icon" style="font-size:9px;font-weight:800;">${med.icon}</div>
+    <div class="med-row">
+      <div class="med-icon-box">${med.abbr}</div>
       <div>
         <div class="med-name">${med.name} <strong>${med.dose}</strong></div>
-        <div class="med-dose">${med.freq}</div>
+        <div class="med-dose-freq">${med.freq}</div>
       </div>
-    </li>
+    </div>
   `).join("");
 
-  const encountersHtml = m.encounters.map(e => `
-    <li class="encounter-item">
-      <div class="encounter-date">${e.date}</div>
-      <div class="encounter-detail">
-        <div class="encounter-type">${e.type}</div>
-        <div class="encounter-note">${e.note}</div>
+  const encHtml = m.encounters.map(e => `
+    <div class="enc-row">
+      <div class="enc-date">${e.date}</div>
+      <div>
+        <div class="enc-type">${e.type}</div>
+        <div class="enc-note">${e.note}</div>
       </div>
-    </li>
+    </div>
   `).join("");
 
-  const gapsHtml = m.careGaps.map(g => `
-    <li class="gap-item ${g.status === 'open' ? 'gap-open' : 'gap-closed'}">
-      <span class="gap-icon">${g.status === 'open' ? '&#9888;' : '&#10003;'}</span>
-      <span class="gap-text">${g.text}</span>
-      <span class="gap-due">${g.due}</span>
-      <span class="gap-status-pill ${g.status === 'open' ? 'pill-open' : 'pill-closed'}">${g.status === 'open' ? 'Open' : 'Closed'}</span>
-    </li>
+  const hedisHtml = m.hedis.map(h => `
+    <tr>
+      <td><span class="measure-id">${h.id}</span></td>
+      <td style="font-weight:500;">${h.name}</td>
+      <td><span class="${h.gap === 'OPEN' ? 'gap-open' : 'gap-closed'}">${h.gap}</span></td>
+      <td style="color:var(--graymd);font-size:11.5px;">${h.detail}</td>
+      <td style="color:var(--graymd);font-size:11px;font-family:Consolas,monospace;">${h.signal}</td>
+    </tr>
   `).join("");
 
-  const openGaps   = m.careGaps.filter(g => g.status === 'open').length;
-  const closedGaps = m.careGaps.filter(g => g.status === 'closed').length;
+  document.getElementById("detailArea").innerHTML = `
 
-  document.getElementById("detailPanel").innerHTML = `
-    <!-- Header -->
-    <div class="detail-header">
-      <div class="detail-avatar ${avatarClass}">${m.initials}</div>
-      <div class="detail-identity">
-        <div class="detail-name">${m.name}</div>
-        <div class="detail-sub">${m.age} years old &middot; ${m.sex === 'M' ? 'Male' : 'Female'} &middot; DOB: ${m.dob}</div>
-        <div class="detail-meta">
-          <span class="meta-chip">ID: ${m.memberId}</span>
-          <span class="meta-chip">PCP: ${m.pcp}</span>
-          <span class="meta-chip">${m.plan}</span>
+    <!-- Member Banner -->
+    <div class="member-banner">
+      <div class="banner-avatar av-${m.risk.toLowerCase()}">${m.initials}</div>
+      <div class="banner-identity">
+        <div class="banner-name">${m.name}</div>
+        <div class="banner-meta">
+          <span>${m.age} years old</span>
+          <span>${m.sex === 'M' ? 'Male' : 'Female'}</span>
+          <span>DOB: ${m.dob}</span>
+        </div>
+        <div class="banner-chips">
+          <span class="banner-chip">ID: ${m.memberId}</span>
+          <span class="banner-chip">PCP: ${m.pcp}</span>
+          <span class="banner-chip">${m.plan}</span>
+        </div>
+        <div class="score-section">
+          <div class="score-label">Risk Score: ${m.riskScore.toFixed(2)} / 1.00 &nbsp;&middot;&nbsp; ${openGaps} open HEDIS gap${openGaps !== 1 ? 's' : ''}</div>
+          <div class="score-bar-track">
+            <div class="score-bar-fill" style="width:${m.riskScore * 100}%;background:${tierColor};"></div>
+          </div>
         </div>
       </div>
-      <div class="detail-risk-block">
-        <div class="detail-risk-label">Risk Level</div>
-        <div class="detail-risk-badge ${riskClass}">${m.risk}</div>
+      <div class="banner-risk">
+        <div class="banner-risk-label">Risk Level</div>
+        <div class="banner-risk-badge risk-${m.risk}">${m.risk}</div>
       </div>
     </div>
 
     <!-- Conditions + Vitals -->
-    <div class="section-grid">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-header-icon icon-red">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-          </div>
-          <span class="card-title">Active Conditions</span>
-        </div>
-        <div class="card-body">
-          <ul class="condition-list">${conditionsHtml}</ul>
-        </div>
+    <div class="grid2">
+      <div class="panel">
+        <div class="panel-header"><div class="dot"></div>Active Conditions</div>
+        <div class="panel-body">${conditionsHtml}</div>
       </div>
-      <div class="card">
-        <div class="card-header">
-          <div class="card-header-icon icon-blue">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          </div>
-          <span class="card-title">Latest Vitals</span>
-        </div>
-        <div class="card-body">
-          <div class="vitals-grid">${vitalsHtml}</div>
-        </div>
+      <div class="panel">
+        <div class="panel-header"><div class="dot"></div>Latest Vitals</div>
+        <div class="panel-body"><div class="vitals-grid">${vitalsHtml}</div></div>
       </div>
     </div>
 
     <!-- Medications + Encounters -->
-    <div class="section-grid">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-header-icon icon-teal">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
-          </div>
-          <span class="card-title">Medications</span>
-        </div>
-        <div class="card-body">
-          <ul class="med-list">${medsHtml}</ul>
-        </div>
+    <div class="grid2">
+      <div class="panel">
+        <div class="panel-header"><div class="dot"></div>Current Medications</div>
+        <div class="panel-body">${medsHtml}</div>
       </div>
-      <div class="card">
-        <div class="card-header">
-          <div class="card-header-icon icon-purple">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          </div>
-          <span class="card-title">Recent Encounters</span>
-        </div>
-        <div class="card-body">
-          <ul class="encounter-list">${encountersHtml}</ul>
-        </div>
+      <div class="panel">
+        <div class="panel-header"><div class="dot"></div>Recent Encounters</div>
+        <div class="panel-body">${encHtml}</div>
       </div>
     </div>
 
-    <!-- Care Gaps -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-header-icon icon-orange">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        </div>
-        <span class="card-title">Care Gaps</span>
-        <span style="margin-left:auto;font-size:11px;color:var(--text-muted)">${openGaps} open &middot; ${closedGaps} closed</span>
-      </div>
-      <div class="card-body">
-        <ul class="gap-list">${gapsHtml}</ul>
+    <!-- HEDIS Measures — full width -->
+    <div class="panel">
+      <div class="panel-header"><div class="dot"></div>HEDIS Quality Measures — ${new Date().getFullYear()}</div>
+      <div class="panel-body" style="padding:0;">
+        <table class="hedis-table">
+          <thead><tr>
+            <th>Measure ID</th><th>Measure Name</th><th>Status</th><th>Detail</th><th>FHIR Signal</th>
+          </tr></thead>
+          <tbody>${hedisHtml}</tbody>
+        </table>
       </div>
     </div>
   `;
