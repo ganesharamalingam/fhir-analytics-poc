@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 180" width="160" height="180">
+  <defs>
+    <linearGradient id="senzai-grad" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#0D2B55"/>
+      <stop offset="50%"  stop-color="#1A5FA8"/>
+      <stop offset="100%" stop-color="#2DD4C0"/>
+    </linearGradient>
+    <clipPath id="hex-clip">
+      <!-- Hexagonal outer shape -->
+      <polygon points="80,4 148,42 148,138 80,176 12,138 12,42"/>
+    </clipPath>
+  </defs>
+
+  <!-- Outer hexagonal shape with gradient -->
+  <polygon points="80,4 148,42 148,138 80,176 12,138 12,42" fill="url(#senzai-grad)"/>
+
+  <!-- White geometric cutout — stylised K / arrow mark -->
+  <!-- Left vertical bar -->
+  <rect x="34" y="48" width="22" height="84" fill="white" rx="3"/>
+
+  <!-- Upper-right arm (top of K) -->
+  <polygon points="56,90 108,48 126,48 74,90" fill="white"/>
+
+  <!-- Lower-right arm (bottom of K) -->
+  <polygon points="56,90 126,132 108,132 74,90" fill="white"/>
+
+  <!-- Inner cutout to create negative space / depth -->
+  <polygon points="56,90 92,64 92,75 68,90 92,105 92,116" fill="url(#senzai-grad)"/>
+</svg>
