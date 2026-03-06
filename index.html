@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Infinite Care Manager Dashboard</title>
+  <style>
+    /* ── Design Tokens ──────────────────────────────────────── */
+    :root {
+      --infinite-navy:       #0D1F3C;
+      --infinite-navy-mid:   #152a4e;
+      --infinite-blue:       #1A4B8C;
+      --infinite-accent:     #00A3E0;
+      --infinite-accent-dim: #0082b3;
+      --infinite-teal:       #00C6B8;
+      --surface:             #F4F6FA;
+      --surface-card:        #FFFFFF;
+      --border:              #DDE3EE;
+      --text-primary:        #0D1F3C;
+      --text-secondary:      #5A6B87;
+      --text-muted:          #8A96A8;
+      --risk-high:           #D93025;
+      --risk-high-bg:        #FDECEA;
+      --risk-med:            #E07B00;
+      --risk-med-bg:         #FEF3E2;
+      --risk-low:            #1A7F4B;
+      --risk-low-bg:         #E6F4EC;
+      --radius:              8px;
+      --shadow-sm:           0 1px 4px rgba(13,31,60,.08);
+      --shadow-md:           0 4px 16px rgba(13,31,60,.12);
+    }
+
+    /* ── Reset & Base ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--surface); color: var(--text-primary); font-size: 14px; }
+
+    /* ── App Shell ──────────────────────────────────────────── */
+    .app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+    /* ── Top Navigation ─────────────────────────────────────── */
+    .topnav {
+      background: var(--infinite-navy);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: 56px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,.25);
+      z-index: 10;
+    }
+    .topnav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .topnav-logo {
+      width: 32px;
+      height: 32px;
+      background: var(--infinite-accent);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: -1px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .topnav-name {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: #fff;
+    }
+    .topnav-name span { color: var(--infinite-accent); }
+    .topnav-module {
+      font-size: 12px;
+      color: rgba(255,255,255,.5);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-left: 4px;
+      padding-left: 12px;
+      border-left: 1px solid rgba(255,255,255,.15);
+    }
+    .topnav-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: rgba(255,255,255,.75);
+    }
+    .topnav-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--infinite-blue);
+      border: 2px solid rgba(255,255,255,.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    /* ── Main Layout ────────────────────────────────────────── */
+    .main { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── Member List (Left Panel) ───────────────────────────── */
+    .panel-left {
+      width: 300px;
+      flex-shrink: 0;
+      background: var(--surface-card);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .panel-left-header {
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .panel-left-header h2 {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+    }
+    .search-box {
+      position: relative;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 7px 10px 7px 32px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 13px;
+      color: var(--text-primary);
+      background: var(--surface);
+      outline: none;
+      transition: border-color .15s;
+    }
+    .search-box input:focus { border-color: var(--infinite-accent); }
+    .search-box svg {
+      position: absolute;
+      left: 9px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+    .member-list { overflow-y: auto; flex: 1; }
+    .member-card {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background .12s;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .member-card:hover { background: var(--surface); }
+    .member-card.active {
+      background: #EAF4FC;
+      border-left: 3px solid var(--infinite-accent);
+      padding-left: 15px;
+    }
+    .member-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .avatar-high { background: #B0341C; }
+    .avatar-med  { background: #B06200; }
+    .avatar-low  { background: #1A6B40; }
+
+    .member-info { flex: 1; min-width: 0; }
+    .member-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .member-demo {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+    .member-dx {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .risk-badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 3px 7px;
+      border-radius: 20px;
+      flex-shrink: 0;
+      margin-top: 2px;
+      text-transform: uppercase;
+    }
+    .risk-HIGH  { background: var(--risk-high-bg); color: var(--risk-high); }
+    .risk-MEDIUM { background: var(--risk-med-bg);  color: var(--risk-med); }
+    .risk-LOW   { background: var(--risk-low-bg);  color: var(--risk-low); }
+
+    /* ── Detail Panel (Right) ───────────────────────────────── */
+    .panel-right {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .detail-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    .detail-avatar {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .detail-identity { flex: 1; }
+    .detail-name {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+    .detail-sub {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+    .detail-meta {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .meta-chip {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    .detail-risk-block {
+      text-align: center;
+    }
+    .detail-risk-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .detail-risk-badge {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      padding: 8px 18px;
+      border-radius: 24px;
+      text-transform: uppercase;
+    }
+
+    /* ── Section Grid ───────────────────────────────────────── */
+    .section-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .section-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    .card {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #FAFBFD;
+    }
+    .card-header-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .icon-blue   { background: #DCEEFB; color: var(--infinite-blue); }
+    .icon-teal   { background: #D4F5F3; color: #00897B; }
+    .icon-orange { background: #FEF0DC; color: #C97000; }
+    .icon-red    { background: #FDECEA; color: #C0392B; }
+    .icon-purple { background: #EDE7F6; color: #6A3BAF; }
+    .icon-green  { background: #E6F4EC; color: #1A7F4B; }
+
+    .card-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+    }
+    .card-body { padding: 14px 18px; }
+
+    /* ── Conditions list ────────────────────────────────────── */
+    .condition-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .condition-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+    .condition-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .dot-active   { background: var(--risk-high); }
+    .dot-managed  { background: var(--risk-med); }
+    .dot-resolved { background: var(--risk-low); }
+    .condition-name { font-size: 13px; font-weight: 500; flex: 1; }
+    .condition-since { font-size: 11px; color: var(--text-muted); }
+    .condition-status {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    .status-active   { background: var(--risk-high-bg); color: var(--risk-high); }
+    .status-managed  { background: var(--risk-med-bg);  color: var(--risk-med); }
+
+    /* ── Vitals ─────────────────────────────────────────────── */
+    .vitals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .vital-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+    }
+    .vital-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .vital-value { font-size: 18px; font-weight: 700; color: var(--text-primary); line-height: 1; }
+    .vital-unit  { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+    .vital-flag  { font-size: 10px; font-weight: 700; margin-top: 4px; }
+    .flag-high   { color: var(--risk-high); }
+    .flag-ok     { color: var(--risk-low); }
+
+    /* ── Medications ────────────────────────────────────────── */
+    .med-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .med-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+    .med-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      background: var(--infinite-blue);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 13px;
+    }
+    .med-name { font-size: 13px; font-weight: 500; }
+    .med-dose { font-size: 11.5px; color: var(--text-secondary); margin-top: 2px; }
+
+    /* ── Encounters ─────────────────────────────────────────── */
+    .encounter-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .encounter-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 8px 10px;
+      border-radius: 6px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+    .encounter-date {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--infinite-accent-dim);
+      white-space: nowrap;
+      min-width: 68px;
+      padding-top: 1px;
+    }
+    .encounter-detail { flex: 1; }
+    .encounter-type { font-size: 13px; font-weight: 500; }
+    .encounter-note { font-size: 11.5px; color: var(--text-secondary); margin-top: 2px; }
+
+    /* ── Care Gaps ──────────────────────────────────────────── */
+    .gap-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .gap-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      border: 1px solid;
+    }
+    .gap-open   { background: #FEF3E2; border-color: #F5C76E; }
+    .gap-closed { background: var(--risk-low-bg); border-color: #7BCDA0; }
+    .gap-icon { font-size: 15px; flex-shrink: 0; }
+    .gap-text { flex: 1; font-size: 13px; font-weight: 500; }
+    .gap-due  { font-size: 11px; color: var(--text-muted); }
+    .gap-status-pill {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 12px;
+    }
+    .pill-open   { background: var(--risk-med-bg); color: var(--risk-med); }
+    .pill-closed { background: var(--risk-low-bg); color: var(--risk-low); }
+
+    /* ── Empty / No selection ───────────────────────────────── */
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      gap: 12px;
+    }
+    .empty-icon { font-size: 48px; opacity: .4; }
+    .empty-label { font-size: 14px; }
+
+    /* ── Scrollbar ──────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Top Navigation -->
+  <nav class="topnav">
+    <div class="topnav-brand">
+      <div class="topnav-logo">Ix</div>
+      <div>
+        <span class="topnav-name">Infinite<span>Health</span></span>
+        <span class="topnav-module">Care Manager Dashboard</span>
+      </div>
+    </div>
+    <div class="topnav-user">
+      <div class="topnav-avatar">CM</div>
+      Care Manager
+    </div>
+  </nav>
+
+  <div class="main">
+    <!-- Left: Member List -->
+    <aside class="panel-left">
+      <div class="panel-left-header">
+        <h2>My Panel</h2>
+        <div class="search-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Search members..." id="searchInput" oninput="filterMembers(this.value)" />
+        </div>
+      </div>
+      <div class="member-list" id="memberList"></div>
+    </aside>
+
+    <!-- Right: Clinical Detail -->
+    <section class="panel-right" id="detailPanel">
+      <div class="empty-state">
+        <div class="empty-icon">&#x1F465;</div>
+        <div class="empty-label">Select a member to view their clinical summary</div>
+      </div>
+    </section>
+  </div>
+
+</div>
+
+<script>
+// ── Member Data ──────────────────────────────────────────────────────────────
+const MEMBERS = [
+  {
+    id: 1,
+    name: "Carlos Ramirez",
+    age: 57,
+    sex: "M",
+    risk: "HIGH",
+    initials: "CR",
+    dob: "1967-03-14",
+    memberId: "INF-00441",
+    pcp: "Dr. Anika Patel",
+    plan: "Infinite Complete (HMO)",
+    primaryDx: "Type 2 Diabetes, Hypertension",
+    conditions: [
+      { name: "Type 2 Diabetes Mellitus", icd: "E11.9", since: "2015", status: "active" },
+      { name: "Essential Hypertension",   icd: "I10",   since: "2013", status: "active" },
+      { name: "Diabetic Peripheral Neuropathy", icd: "E11.40", since: "2020", status: "managed" },
+      { name: "Hyperlipidemia",           icd: "E78.5", since: "2016", status: "managed" },
+    ],
+    vitals: [
+      { label: "Blood Pressure", value: "148/92", unit: "mmHg", flag: "high", flagText: "Elevated" },
+      { label: "HbA1c",          value: "8.4",    unit: "%",    flag: "high", flagText: "Above goal" },
+      { label: "BMI",            value: "31.2",   unit: "kg/m²",flag: "high", flagText: "Obese I" },
+      { label: "eGFR",           value: "61",     unit: "mL/min/1.73m²", flag: "ok", flagText: "G2 (Mild decrease)" },
+    ],
+    medications: [
+      { name: "Metformin",    dose: "1000 mg", freq: "Twice daily", icon: "Mx" },
+      { name: "Lisinopril",   dose: "20 mg",   freq: "Once daily",  icon: "Li" },
+      { name: "Atorvastatin", dose: "40 mg",   freq: "Once daily at bedtime", icon: "At" },
+      { name: "Glipizide",    dose: "10 mg",   freq: "Twice daily with meals", icon: "Gx" },
+      { name: "Amlodipine",   dose: "5 mg",    freq: "Once daily",  icon: "Am" },
+    ],
+    encounters: [
+      { date: "Feb 14, 2026", type: "PCP Office Visit", note: "HTN follow-up; BP still elevated, titrated Lisinopril" },
+      { date: "Dec 03, 2025", type: "Endocrinology",    note: "Diabetes management; HbA1c 8.4%, added Glipizide" },
+      { date: "Oct 22, 2025", type: "ED Visit",         note: "Hypoglycemic episode, resolved without admission" },
+      { date: "Aug 07, 2025", type: "Lab / Radiology",  note: "Annual labs, foot X-ray for neuropathy baseline" },
+    ],
+    careGaps: [
+      { text: "Diabetic Eye Exam",           due: "Overdue — last completed 2023",      status: "open" },
+      { text: "Nephrology Referral",         due: "Due — eGFR trending down",            status: "open" },
+      { text: "Flu Vaccine (2025–26)",       due: "Due this season",                     status: "open" },
+      { text: "Statin Therapy Adherence",    due: "Adherence confirmed Feb 2026",        status: "closed" },
+    ],
+  },
+  {
+    id: 2,
+    name: "Linda Chen",
+    age: 63,
+    sex: "F",
+    risk: "MEDIUM",
+    initials: "LC",
+    dob: "1962-09-28",
+    memberId: "INF-00782",
+    pcp: "Dr. Samuel Torres",
+    plan: "Infinite Select (PPO)",
+    primaryDx: "Hypertension",
+    conditions: [
+      { name: "Essential Hypertension", icd: "I10",   since: "2018", status: "managed" },
+      { name: "Osteoarthritis, knee",   icd: "M17.11",since: "2022", status: "managed" },
+    ],
+    vitals: [
+      { label: "Blood Pressure", value: "132/82", unit: "mmHg", flag: "ok", flagText: "Near goal" },
+      { label: "BMI",            value: "27.8",   unit: "kg/m²",flag: "ok", flagText: "Overweight" },
+      { label: "Total Cholesterol", value: "196", unit: "mg/dL", flag: "ok", flagText: "Acceptable" },
+      { label: "eGFR",           value: "74",     unit: "mL/min/1.73m²", flag: "ok", flagText: "G2 (Normal)" },
+    ],
+    medications: [
+      { name: "Amlodipine",   dose: "10 mg",  freq: "Once daily",          icon: "Am" },
+      { name: "Hydrochlorothiazide", dose: "25 mg", freq: "Once daily",    icon: "Hz" },
+      { name: "Naproxen",     dose: "220 mg", freq: "PRN for joint pain",  icon: "Np" },
+    ],
+    encounters: [
+      { date: "Jan 28, 2026", type: "PCP Office Visit",  note: "Routine HTN check; BP well controlled on current regimen" },
+      { date: "Nov 11, 2025", type: "Orthopedics",       note: "Knee OA follow-up; conservative management, PT referral" },
+      { date: "Sep 05, 2025", type: "Lab / Radiology",   note: "Annual labs; all values within acceptable range" },
+    ],
+    careGaps: [
+      { text: "Colorectal Cancer Screening",  due: "Due — age-appropriate screening",     status: "open" },
+      { text: "Mammogram (2025)",             due: "Due — biennial schedule",              status: "open" },
+      { text: "Flu Vaccine (2025–26)",        due: "Administered Oct 2025",               status: "closed" },
+      { text: "Blood Pressure Monitoring",    due: "Patient self-monitoring — compliant",  status: "closed" },
+    ],
+  },
+  {
+    id: 3,
+    name: "James Okafor",
+    age: 45,
+    sex: "M",
+    risk: "LOW",
+    initials: "JO",
+    dob: "1980-06-05",
+    memberId: "INF-01139",
+    pcp: "Dr. Rachel Kim",
+    plan: "Infinite Core (HMO)",
+    primaryDx: "No chronic conditions",
+    conditions: [
+      { name: "No active chronic conditions", icd: "Z00.00", since: "—", status: "managed" },
+    ],
+    vitals: [
+      { label: "Blood Pressure", value: "118/74", unit: "mmHg", flag: "ok", flagText: "Normal" },
+      { label: "BMI",            value: "24.1",   unit: "kg/m²",flag: "ok", flagText: "Normal" },
+      { label: "Total Cholesterol", value: "182", unit: "mg/dL", flag: "ok", flagText: "Optimal" },
+      { label: "Glucose (fasting)", value: "89",  unit: "mg/dL", flag: "ok", flagText: "Normal" },
+    ],
+    medications: [
+      { name: "No current medications", dose: "—", freq: "Preventive care only", icon: "—" },
+    ],
+    encounters: [
+      { date: "Nov 20, 2025", type: "Annual Wellness Exam", note: "All vitals normal; preventive labs ordered" },
+      { date: "Oct 10, 2025", type: "Lab / Radiology",      note: "Preventive panel; cholesterol and glucose WNL" },
+    ],
+    careGaps: [
+      { text: "Annual Wellness Visit (2026)", due: "Due — last Nov 2025 (schedule Nov 2026)", status: "closed" },
+      { text: "Flu Vaccine (2025–26)",        due: "Administered Oct 2025",                   status: "closed" },
+    ],
+  },
+];
+
+// ── State ────────────────────────────────────────────────────────────────────
+let activeMemberId = null;
+
+// ── Render member list ───────────────────────────────────────────────────────
+function renderMemberList(filter = "") {
+  const list = document.getElementById("memberList");
+  const lower = filter.toLowerCase();
+  const filtered = MEMBERS.filter(m =>
+    m.name.toLowerCase().includes(lower) ||
+    m.primaryDx.toLowerCase().includes(lower) ||
+    m.risk.toLowerCase().includes(lower)
+  );
+
+  list.innerHTML = filtered.map(m => `
+    <div class="member-card ${activeMemberId === m.id ? "active" : ""}" onclick="selectMember(${m.id})">
+      <div class="member-avatar avatar-${m.risk.toLowerCase()}">${m.initials}</div>
+      <div class="member-info">
+        <div class="member-name">${m.name}</div>
+        <div class="member-demo">${m.age}${m.sex} &middot; ID: ${m.memberId}</div>
+        <div class="member-dx">${m.primaryDx}</div>
+      </div>
+      <span class="risk-badge risk-${m.risk}">${m.risk}</span>
+    </div>
+  `).join("");
+}
+
+// ── Filter ───────────────────────────────────────────────────────────────────
+function filterMembers(val) { renderMemberList(val); }
+
+// ── Select member ────────────────────────────────────────────────────────────
+function selectMember(id) {
+  activeMemberId = id;
+  renderMemberList(document.getElementById("searchInput").value);
+  const m = MEMBERS.find(x => x.id === id);
+  renderDetail(m);
+}
+
+// ── Render detail ────────────────────────────────────────────────────────────
+function renderDetail(m) {
+  const avatarClass = `avatar-${m.risk.toLowerCase()}`;
+  const riskClass   = `risk-${m.risk}`;
+
+  const conditionsHtml = m.conditions.map(c => `
+    <li class="condition-item">
+      <span class="condition-dot ${c.status === 'active' ? 'dot-active' : 'dot-managed'}"></span>
+      <span class="condition-name">${c.name} <small style="color:var(--text-muted)">(${c.icd})</small></span>
+      <span class="condition-since">Since ${c.since}</span>
+      <span class="condition-status ${c.status === 'active' ? 'status-active' : 'status-managed'}">${c.status}</span>
+    </li>
+  `).join("");
+
+  const vitalsHtml = m.vitals.map(v => `
+    <div class="vital-item">
+      <div class="vital-label">${v.label}</div>
+      <div class="vital-value">${v.value}</div>
+      <div class="vital-unit">${v.unit}</div>
+      <div class="vital-flag ${v.flag === 'high' ? 'flag-high' : 'flag-ok'}">${v.flagText}</div>
+    </div>
+  `).join("");
+
+  const medsHtml = m.medications.map(med => `
+    <li class="med-item">
+      <div class="med-icon" style="font-size:9px;font-weight:800;">${med.icon}</div>
+      <div>
+        <div class="med-name">${med.name} <strong>${med.dose}</strong></div>
+        <div class="med-dose">${med.freq}</div>
+      </div>
+    </li>
+  `).join("");
+
+  const encountersHtml = m.encounters.map(e => `
+    <li class="encounter-item">
+      <div class="encounter-date">${e.date}</div>
+      <div class="encounter-detail">
+        <div class="encounter-type">${e.type}</div>
+        <div class="encounter-note">${e.note}</div>
+      </div>
+    </li>
+  `).join("");
+
+  const gapsHtml = m.careGaps.map(g => `
+    <li class="gap-item ${g.status === 'open' ? 'gap-open' : 'gap-closed'}">
+      <span class="gap-icon">${g.status === 'open' ? '&#9888;' : '&#10003;'}</span>
+      <span class="gap-text">${g.text}</span>
+      <span class="gap-due">${g.due}</span>
+      <span class="gap-status-pill ${g.status === 'open' ? 'pill-open' : 'pill-closed'}">${g.status === 'open' ? 'Open' : 'Closed'}</span>
+    </li>
+  `).join("");
+
+  const openGaps   = m.careGaps.filter(g => g.status === 'open').length;
+  const closedGaps = m.careGaps.filter(g => g.status === 'closed').length;
+
+  document.getElementById("detailPanel").innerHTML = `
+    <!-- Header -->
+    <div class="detail-header">
+      <div class="detail-avatar ${avatarClass}">${m.initials}</div>
+      <div class="detail-identity">
+        <div class="detail-name">${m.name}</div>
+        <div class="detail-sub">${m.age} years old &middot; ${m.sex === 'M' ? 'Male' : 'Female'} &middot; DOB: ${m.dob}</div>
+        <div class="detail-meta">
+          <span class="meta-chip">ID: ${m.memberId}</span>
+          <span class="meta-chip">PCP: ${m.pcp}</span>
+          <span class="meta-chip">${m.plan}</span>
+        </div>
+      </div>
+      <div class="detail-risk-block">
+        <div class="detail-risk-label">Risk Level</div>
+        <div class="detail-risk-badge ${riskClass}">${m.risk}</div>
+      </div>
+    </div>
+
+    <!-- Conditions + Vitals -->
+    <div class="section-grid">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon icon-red">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <span class="card-title">Active Conditions</span>
+        </div>
+        <div class="card-body">
+          <ul class="condition-list">${conditionsHtml}</ul>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon icon-blue">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <span class="card-title">Latest Vitals</span>
+        </div>
+        <div class="card-body">
+          <div class="vitals-grid">${vitalsHtml}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Medications + Encounters -->
+    <div class="section-grid">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon icon-teal">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+          </div>
+          <span class="card-title">Medications</span>
+        </div>
+        <div class="card-body">
+          <ul class="med-list">${medsHtml}</ul>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon icon-purple">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <span class="card-title">Recent Encounters</span>
+        </div>
+        <div class="card-body">
+          <ul class="encounter-list">${encountersHtml}</ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Care Gaps -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon icon-orange">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <span class="card-title">Care Gaps</span>
+        <span style="margin-left:auto;font-size:11px;color:var(--text-muted)">${openGaps} open &middot; ${closedGaps} closed</span>
+      </div>
+      <div class="card-body">
+        <ul class="gap-list">${gapsHtml}</ul>
+      </div>
+    </div>
+  `;
+}
+
+// ── Boot ─────────────────────────────────────────────────────────────────────
+renderMemberList();
+selectMember(1);
+</script>
+</body>
+</html>
