@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>FHIR Clinical Analytics — Infinite × Senzai</title>
+<title>FHIR Clinical Analytics — Infinite Health</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 :root {
@@ -35,17 +35,11 @@ body{display:flex;flex-direction:column;overflow:hidden}
   display:flex;align-items:center;justify-content:space-between;
   box-shadow:0 2px 12px rgba(0,0,0,.35);flex-shrink:0;z-index:20
 }
-.hdr-brand{display:flex;align-items:center;gap:0}
-.brand-inf{display:flex;align-items:center;gap:10px;padding-right:18px;border-right:1px solid rgba(255,255,255,.2)}
-.brand-inf svg{width:34px;height:34px}
-.brand-inf-text{display:flex;flex-direction:column;line-height:1.1}
-.brand-inf-name{font-size:17px;font-weight:800;letter-spacing:1.5px;color:#fff}
-.brand-inf-name span{color:var(--teal)}
-.brand-inf-sub{font-size:9px;letter-spacing:.6px;color:rgba(255,255,255,.5);text-transform:uppercase;margin-top:1px}
-.brand-snz{display:flex;align-items:center;gap:9px;padding-left:18px}
-.brand-snz svg{width:22px;height:28px}
-.brand-snz-text{font-size:15px;font-weight:700;letter-spacing:.8px;color:rgba(255,255,255,.9)}
-.brand-snz-text span{color:var(--teal)}
+.hdr-brand{display:flex;align-items:center;gap:12px}
+.brand-inf svg{width:44px;height:40px;flex-shrink:0}
+.brand-inf-text{display:flex;flex-direction:column;line-height:1}
+.brand-inf-name{font-size:18px;font-weight:800;letter-spacing:1px;color:#fff;font-style:italic}
+.brand-inf-sub{font-size:9.5px;letter-spacing:2px;color:rgba(255,255,255,.45);text-transform:uppercase;margin-top:3px;font-weight:500}
 
 .hdr-center{position:absolute;left:50%;transform:translateX(-50%);text-align:center}
 .hdr-title{font-size:15px;font-weight:700;color:#fff;letter-spacing:.3px}
@@ -277,6 +271,127 @@ body{display:flex;flex-direction:column;overflow:hidden}
 .text-sm{font-size:12px}.text-xs{font-size:11px}.text-muted{color:var(--muted)}
 .font-bold{font-weight:700}.mt-2{margin-top:8px}
 .divider{height:1px;background:var(--border);margin:10px 0}
+
+/* ── MODAL OVERLAY ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(10,20,40,.55);
+  backdrop-filter:blur(2px);z-index:1000;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .2s
+}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{
+  background:#fff;border-radius:16px;width:520px;max-width:95vw;
+  max-height:88vh;display:flex;flex-direction:column;
+  box-shadow:0 20px 60px rgba(0,0,0,.25);
+  transform:translateY(12px);transition:transform .2s
+}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-hdr{
+  padding:20px 24px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0
+}
+.modal-hdr-left{display:flex;flex-direction:column;gap:4px}
+.modal-title{font-size:15px;font-weight:700;color:var(--text)}
+.modal-sub{font-size:12px;color:var(--muted)}
+.modal-close{
+  width:30px;height:30px;border:none;background:var(--surface);
+  border-radius:50%;cursor:pointer;font-size:16px;color:var(--muted);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:background .15s;line-height:1
+}
+.modal-close:hover{background:var(--border);color:var(--text)}
+.modal-body{padding:20px 24px;overflow-y:auto;flex:1}
+.modal-footer{
+  padding:16px 24px;border-top:1px solid var(--border);
+  display:flex;gap:10px;justify-content:flex-end;flex-shrink:0
+}
+.modal-label{
+  font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.5px;color:var(--muted);display:block;margin-bottom:5px
+}
+.modal-input,.modal-select,.modal-textarea{
+  width:100%;border:1px solid var(--border);border-radius:8px;
+  padding:9px 12px;font-size:13px;color:var(--text);
+  font-family:inherit;outline:none;background:#fff;transition:border-color .15s
+}
+.modal-input:focus,.modal-select:focus,.modal-textarea:focus{
+  border-color:var(--blue2);box-shadow:0 0 0 3px rgba(24,114,196,.1)
+}
+.modal-textarea{resize:vertical;min-height:72px}
+.modal-field{margin-bottom:14px}
+.modal-field:last-child{margin-bottom:0}
+.modal-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-badge{
+  display:inline-flex;padding:3px 10px;border-radius:10px;
+  font-size:11px;font-weight:700;margin-left:8px
+}
+.modal-goal{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 12px;border-radius:8px;border:1px solid var(--border);
+  margin-bottom:7px;background:#FAFBFD;cursor:pointer;
+  transition:background .15s
+}
+.modal-goal:hover{background:var(--ltblue)}
+.modal-goal input[type=checkbox]{width:15px;height:15px;accent-color:var(--blue2);flex-shrink:0}
+.modal-goal-text{font-size:12px;color:var(--text);flex:1}
+.channel-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+.channel-btn{
+  border:1.5px solid var(--border);border-radius:10px;padding:10px 6px;
+  background:#fff;cursor:pointer;text-align:center;transition:all .15s;
+  font-size:12px;font-weight:500;color:var(--muted)
+}
+.channel-btn.selected,.channel-btn:hover{
+  border-color:var(--blue2);background:var(--ltblue);color:var(--blue2)
+}
+.channel-btn svg{display:block;margin:0 auto 4px;width:20px;height:20px}
+.fhir-section{margin-bottom:20px}
+.fhir-section-title{
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;
+  color:var(--blue2);border-bottom:2px solid var(--ltblue);
+  padding-bottom:6px;margin-bottom:10px
+}
+.fhir-row{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding:6px 0;border-bottom:1px solid #F3F4F6;font-size:12px
+}
+.fhir-row:last-child{border-bottom:none}
+.fhir-row-label{color:var(--text);font-weight:500;flex:1}
+.fhir-row-code{color:var(--muted);font-size:10px;font-family:monospace;margin:0 10px}
+.fhir-row-val{color:var(--muted);text-align:right;max-width:180px}
+.lab-val{font-weight:700}
+.lab-hi{color:var(--red)}
+.lab-ok{color:var(--green)}
+.lab-warn{color:var(--orange)}
+.btn-primary{
+  background:var(--blue2);color:#fff;border:none;border-radius:8px;
+  padding:10px 22px;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s
+}
+.btn-primary:hover{background:var(--navy)}
+.btn-ghost{
+  background:#fff;color:var(--muted);border:1px solid var(--border);border-radius:8px;
+  padding:10px 18px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s
+}
+.btn-ghost:hover{border-color:var(--blue2);color:var(--blue2)}
+
+/* ── TOAST ── */
+#toast-container{
+  position:fixed;bottom:24px;right:24px;z-index:2000;
+  display:flex;flex-direction:column;gap:10px;pointer-events:none
+}
+.toast{
+  display:flex;align-items:center;gap:10px;
+  background:#fff;border:1px solid var(--border);
+  border-left:4px solid var(--green);border-radius:10px;
+  padding:12px 16px;box-shadow:0 4px 20px rgba(0,0,0,.14);
+  font-size:13px;color:var(--text);min-width:260px;
+  animation:toastIn .25s ease forwards;pointer-events:all
+}
+.toast.hiding{animation:toastOut .25s ease forwards}
+.toast-icon{width:18px;height:18px;flex-shrink:0;color:var(--green)}
+.toast-msg{flex:1;font-weight:500}
+@keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(30px)}}
 </style>
 </head>
 <body>
@@ -284,46 +399,30 @@ body{display:flex;flex-direction:column;overflow:hidden}
 <!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
 <header class="hdr">
   <div class="hdr-brand">
-    <!-- Infinite Logo -->
-    <div class="brand-inf">
-      <svg viewBox="0 0 240 210" xmlns="http://www.w3.org/2000/svg">
+    <div class="brand-inf" style="display:flex;align-items:center;gap:12px">
+      <!-- Infinite logo mark: triangle + teal stripes + swoosh -->
+      <svg viewBox="0 0 100 92" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <clipPath id="hdr-tri-clip">
-            <polygon points="120,8 218,172 22,172"/>
+          <clipPath id="tc">
+            <polygon points="50,2 98,86 2,86"/>
           </clipPath>
         </defs>
-        <polygon points="120,8 218,172 22,172" fill="#1872C4"/>
-        <g clip-path="url(#hdr-tri-clip)">
-          <line x1="60"  y1="182" x2="158" y2="2"  stroke="#2DD4BF" stroke-width="16" stroke-linecap="butt"/>
-          <line x1="86"  y1="182" x2="184" y2="2"  stroke="#2DD4BF" stroke-width="16" stroke-linecap="butt"/>
-          <line x1="112" y1="182" x2="210" y2="2"  stroke="#2DD4BF" stroke-width="16" stroke-linecap="butt"/>
+        <!-- Blue triangle -->
+        <polygon points="50,2 98,86 2,86" fill="#1578C8"/>
+        <!-- Three teal diagonal stripes clipped inside triangle -->
+        <g clip-path="url(#tc)">
+          <line x1="14" y1="96" x2="70" y2="-4" stroke="#2DD4BF" stroke-width="10" stroke-linecap="butt"/>
+          <line x1="30" y1="96" x2="86" y2="-4" stroke="#2DD4BF" stroke-width="10" stroke-linecap="butt"/>
+          <line x1="46" y1="96" x2="102" y2="-4" stroke="#2DD4BF" stroke-width="10" stroke-linecap="butt"/>
         </g>
-        <ellipse cx="120" cy="173" rx="100" ry="13" fill="none" stroke="#2DD4BF" stroke-width="5.5"
-                 stroke-dasharray="340 120" stroke-dashoffset="68" stroke-linecap="round"/>
+        <!-- Teal orbital swoosh at base -->
+        <ellipse cx="50" cy="86" rx="48" ry="7" fill="none" stroke="#2DD4BF" stroke-width="4"
+                 stroke-dasharray="165 55" stroke-dashoffset="28" stroke-linecap="round"/>
       </svg>
       <div class="brand-inf-text">
-        <div class="brand-inf-name">INFIN<span>ITE</span></div>
+        <div class="brand-inf-name">infinite</div>
         <div class="brand-inf-sub">Health Analytics</div>
       </div>
-    </div>
-
-    <!-- Senzai Logo -->
-    <div class="brand-snz">
-      <svg viewBox="0 0 140 172" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="hdr-sg" x1="100%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%"   stop-color="#0A2848"/>
-            <stop offset="45%"  stop-color="#1255A4"/>
-            <stop offset="100%" stop-color="#1FC8C8"/>
-          </linearGradient>
-        </defs>
-        <polygon points="8,4 108,4 132,86 108,168 8,168" fill="url(#hdr-sg)"/>
-        <rect x="28" y="40" width="20" height="92" fill="white" rx="2"/>
-        <polygon points="48,86 96,40 116,40 68,86" fill="white"/>
-        <polygon points="48,86 116,132 96,132 68,86" fill="white"/>
-        <polygon points="48,86 80,62 80,72 62,86 80,100 80,110" fill="url(#hdr-sg)"/>
-      </svg>
-      <div class="brand-snz-text">SEN<span>ZAI</span></div>
     </div>
   </div>
 
@@ -373,7 +472,7 @@ body{display:flex;flex-direction:column;overflow:hidden}
       <option value="medicaid">Medicaid</option>
       <option value="commercial">Commercial</option>
     </select>
-    <button class="btn-export" onclick="alert('Export to CSV — coming soon')">
+    <button class="btn-export" onclick="showToast('Export queued — CSV will download shortly')">
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 1v7M3 5.5l3 3 3-3"/><path d="M1.5 9.5v.5a1 1 0 001 1h7a1 1 0 001-1v-.5"/></svg>
       Export
     </button>
@@ -538,7 +637,7 @@ body{display:flex;flex-direction:column;overflow:hidden}
           <option>Chronic Care</option>
           <option>Behavioral Health</option>
         </select>
-        <button class="btn-export" onclick="alert('Measure detail export')">Export</button>
+        <button class="btn-export" onclick="showToast('Measure export queued')">Export</button>
       </div>
     </div>
     <div class="hedis-table-wrap">
@@ -643,9 +742,9 @@ body{display:flex;flex-direction:column;overflow:hidden}
           </div>
           <div class="detail-section">
             <div class="detail-section-title">Actions</div>
-            <button class="detail-btn" onclick="alert('Opening care management workflow...')">Create Care Plan</button>
-            <button class="detail-btn detail-btn-outline mt-2" onclick="alert('Scheduling outreach...')">Schedule Outreach</button>
-            <button class="detail-btn detail-btn-outline mt-2" onclick="alert('Opening FHIR record...')">View FHIR Record</button>
+            <button class="detail-btn" onclick="openCarePlanModal()">Create Care Plan</button>
+            <button class="detail-btn detail-btn-outline mt-2" onclick="openOutreachModal()">Schedule Outreach</button>
+            <button class="detail-btn detail-btn-outline mt-2" onclick="openFhirModal()">View FHIR Record</button>
           </div>
         </div>
       </div>
@@ -730,11 +829,127 @@ body{display:flex;flex-direction:column;overflow:hidden}
       <div class="detail-row"><span class="detail-row-label">Daily Summary</span><span class="detail-row-val" style="color:var(--green)">Enabled · 7:00 AM</span></div>
       <div class="detail-row"><span class="detail-row-label">Care Gap Threshold</span><span class="detail-row-val">Alert when &gt; 20% members</span></div>
     </div>
-    <button class="detail-btn" onclick="alert('Settings saved')">Save Configuration</button>
+    <button class="detail-btn" onclick="showToast('Configuration saved successfully')">Save Configuration</button>
   </div>
 </section>
 
 </main>
+
+<!-- ═══════════════ TOAST CONTAINER ═══════════════ -->
+<div id="toast-container"></div>
+
+<!-- ═══════════════ MODAL: CREATE CARE PLAN ═══════════════ -->
+<div class="modal-overlay" id="modal-careplan" onclick="overlayClose(event,'modal-careplan')">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-hdr-left">
+        <div class="modal-title">Create Care Plan</div>
+        <div class="modal-sub" id="cp-member-sub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('modal-careplan')">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-field">
+        <label class="modal-label">Care Goals — Open Gaps <span style="font-size:10px;color:var(--muted);text-transform:none;letter-spacing:0">(check goals to include)</span></label>
+        <div id="cp-goals"></div>
+      </div>
+      <div class="modal-row">
+        <div class="modal-field">
+          <label class="modal-label">Priority</label>
+          <select class="modal-select" id="cp-priority">
+            <option value="High">High</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="Low">Low</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Assigned To</label>
+          <input class="modal-input" type="text" id="cp-assigned" placeholder="Care manager name"/>
+        </div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Clinical Notes</label>
+        <textarea class="modal-textarea" id="cp-notes" placeholder="Add clinical notes, context, or instructions for this care plan..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('modal-careplan')">Cancel</button>
+      <button class="btn-primary" onclick="saveCarePlan()">Save Care Plan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MODAL: SCHEDULE OUTREACH ═══════════════ -->
+<div class="modal-overlay" id="modal-outreach" onclick="overlayClose(event,'modal-outreach')">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-hdr-left">
+        <div class="modal-title">Schedule Outreach</div>
+        <div class="modal-sub" id="or-member-sub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('modal-outreach')">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-field">
+        <label class="modal-label">Outreach Channel</label>
+        <div class="channel-grid">
+          <button class="channel-btn selected" id="ch-phone" onclick="selectChannel('phone')">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 4.5A1.5 1.5 0 014.5 3h.878c.414 0 .75.336.75.75v3.5a.75.75 0 01-.75.75H4.5A1.5 1.5 0 013 6.5v-2zm13 0v2a1.5 1.5 0 01-1.5 1.5h-.878a.75.75 0 01-.75-.75V4.75a.75.75 0 01.75-.75h.878A1.5 1.5 0 0116 4.5zm-2.5 9a7.5 7.5 0 00-7.5-7.5"/></svg>
+            Phone Call
+          </button>
+          <button class="channel-btn" id="ch-sms" onclick="selectChannel('sms')">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v7a2 2 0 01-2 2H6l-4 3V5z"/></svg>
+            SMS
+          </button>
+          <button class="channel-btn" id="ch-portal" onclick="selectChannel('portal')">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="4" width="16" height="12" rx="2"/><path d="M6 8h8M6 12h5"/></svg>
+            Portal Message
+          </button>
+        </div>
+      </div>
+      <div class="modal-row">
+        <div class="modal-field">
+          <label class="modal-label">Date</label>
+          <input class="modal-input" type="date" id="or-date"/>
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Time</label>
+          <input class="modal-input" type="time" id="or-time" value="10:00"/>
+        </div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Reason / Priority Gap</label>
+        <input class="modal-input" type="text" id="or-reason" placeholder="Reason for outreach"/>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Additional Notes</label>
+        <textarea class="modal-textarea" id="or-notes" placeholder="Any additional context for this outreach..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('modal-outreach')">Cancel</button>
+      <button class="btn-primary" onclick="scheduleOutreach()">Schedule Outreach</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MODAL: VIEW FHIR RECORD ═══════════════ -->
+<div class="modal-overlay" id="modal-fhir" onclick="overlayClose(event,'modal-fhir')">
+  <div class="modal" style="width:600px">
+    <div class="modal-hdr">
+      <div class="modal-hdr-left">
+        <div class="modal-title">Clinical Summary — FHIR R4</div>
+        <div class="modal-sub" id="fhir-member-sub"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('modal-fhir')">&#215;</button>
+    </div>
+    <div class="modal-body" id="fhir-body"></div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('modal-fhir')">Close</button>
+      <button class="btn-primary" onclick="showToast('FHIR export queued');closeModal('modal-fhir')">Export as CCD</button>
+    </div>
+  </div>
+</div>
 
 <script>
 /* ─── DATA ─── */
@@ -845,6 +1060,7 @@ function setRiskFilter(f,el){
 function selectMember(idx){
   const m = MEMBERS[idx];
   if(!m) return;
+  activeMemberIdx = idx;
   document.querySelectorAll('.member-table tr').forEach(r=>r.classList.remove('selected'));
   const row = document.getElementById('mrow-'+idx);
   if(row) row.classList.add('selected');
@@ -960,6 +1176,169 @@ function initAnalyticsCharts(){
     labels:['Hypertension','Diabetes T2','Hyperlipidemia','CHF','COPD','Depression','CKD','AFib','Obesity','Osteoporosis'],
     datasets:[{label:'Prevalence %',data:[41,28,34,14,12,18,11,8,22,9],backgroundColor:BLUE+'BB',borderRadius:5,borderSkipped:false}]
   },options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{max:50,grid:{color:'#EEF2F7'},ticks:{callback:v=>v+'%',font:{size:11}}},y:{grid:{display:false},ticks:{font:{size:11}}}}}});
+}
+
+/* ─── FHIR CLINICAL DATA ─── */
+const FHIR_DATA = {
+  'INF-001842':{
+    conditions:[{name:'Type 2 Diabetes Mellitus, uncontrolled',code:'E11.65'},{name:'Chronic Heart Failure, unspecified',code:'I50.9'},{name:'Chronic Kidney Disease, Stage 3',code:'N18.3'},{name:'Essential Hypertension',code:'I10'}],
+    medications:[{name:'Metformin HCl',dose:'1000 mg',freq:'Twice daily'},{name:'Lisinopril',dose:'10 mg',freq:'Once daily'},{name:'Furosemide',dose:'20 mg',freq:'Once daily'},{name:'Amlodipine',dose:'5 mg',freq:'Once daily'},{name:'Atorvastatin',dose:'40 mg',freq:'Once nightly'},{name:'Aspirin',dose:'81 mg',freq:'Once daily'},{name:'Carvedilol',dose:'6.25 mg',freq:'Twice daily'},{name:'KCl (Potassium)',dose:'20 mEq',freq:'Once daily'}],
+    encounters:[{date:'Nov 14, 2024',type:'PCP Office Visit',provider:'Dr. Rachel Torres',note:'HbA1c reviewed, medication adjustment discussed'},{date:'Sep 2, 2024',type:'Nephrology Consult',provider:'Dr. A. Kapoor',note:'CKD Stage 3 stable, eGFR 42'},{date:'Jul 18, 2024',type:'ED Visit',provider:'Memorial Hospital ED',note:'Acute CHF exacerbation, admitted 2 days'}],
+    labs:[{name:'HbA1c',value:'9.1%',flag:'hi',ref:'<7.0%',date:'Oct 2024'},{name:'eGFR',value:'42',flag:'warn',ref:'>60',date:'Nov 2024'},{name:'BNP',value:'380 pg/mL',flag:'hi',ref:'<100',date:'Nov 2024'},{name:'LDL Cholesterol',value:'88 mg/dL',flag:'ok',ref:'<100',date:'Sep 2024'},{name:'Potassium',value:'4.2 mEq/L',flag:'ok',ref:'3.5–5.1',date:'Nov 2024'}]
+  },
+  'INF-002341':{
+    conditions:[{name:'Chronic Heart Failure, systolic',code:'I50.22'},{name:'Atrial Fibrillation, persistent',code:'I48.11'},{name:'Chronic Obstructive Pulmonary Disease',code:'J44.1'},{name:'Essential Hypertension',code:'I10'}],
+    medications:[{name:'Warfarin',dose:'5 mg',freq:'Once daily (INR-adjusted)'},{name:'Metoprolol Succinate',dose:'25 mg',freq:'Once daily'},{name:'Furosemide',dose:'40 mg',freq:'Once daily'},{name:'Tiotropium',dose:'18 mcg',freq:'Once daily (inhaled)'},{name:'Albuterol',dose:'90 mcg/puff',freq:'PRN (rescue)'},{name:'Lisinopril',dose:'5 mg',freq:'Once daily'},{name:'Spironolactone',dose:'25 mg',freq:'Once daily'},{name:'Digoxin',dose:'0.125 mg',freq:'Once daily'},{name:'Amiodarone',dose:'200 mg',freq:'Once daily'},{name:'Atorvastatin',dose:'40 mg',freq:'Once nightly'},{name:'Aspirin',dose:'81 mg',freq:'Once daily'}],
+    encounters:[{date:'Nov 22, 2024',type:'Hospital Discharge',provider:'St. Luke\'s Medical',note:'CHF admission, 4-day stay, diuresis'},{date:'Oct 8, 2024',type:'Cardiology Follow-up',provider:'Dr. E. Wallace',note:'AFib rate controlled, anticoagulation stable'},{date:'Aug 15, 2024',type:'Pulmonology',provider:'Dr. R. Chen',note:'COPD exacerbation, steroid taper prescribed'}],
+    labs:[{name:'INR',value:'1.8',flag:'warn',ref:'2.0–3.0',date:'Nov 2024'},{name:'BNP',value:'620 pg/mL',flag:'hi',ref:'<100',date:'Nov 2024'},{name:'Potassium',value:'3.9 mEq/L',flag:'ok',ref:'3.5–5.1',date:'Nov 2024'},{name:'Creatinine',value:'1.4 mg/dL',flag:'warn',ref:'0.7–1.2',date:'Nov 2024'},{name:'FEV1',value:'58% predicted',flag:'warn',ref:'>80%',date:'Aug 2024'}]
+  },
+  'INF-003019':{
+    conditions:[{name:'Essential Hypertension',code:'I10'},{name:'Type 2 Diabetes Mellitus',code:'E11.9'},{name:'Obesity, class I',code:'E66.01'},{name:'Hyperlipidemia',code:'E78.5'}],
+    medications:[{name:'Lisinopril',dose:'20 mg',freq:'Once daily'},{name:'Metformin HCl',dose:'500 mg',freq:'Twice daily'},{name:'Amlodipine',dose:'10 mg',freq:'Once daily'},{name:'Atorvastatin',dose:'20 mg',freq:'Once nightly'},{name:'Hydrochlorothiazide',dose:'12.5 mg',freq:'Once daily'},{name:'Aspirin',dose:'81 mg',freq:'Once daily'}],
+    encounters:[{date:'Oct 30, 2024',type:'PCP Office Visit',provider:'Dr. Linda Park',note:'BP 148/92, medication compliance discussed'},{date:'Jul 12, 2024',type:'Nutrition Consult',provider:'RD Sarah Holmes',note:'Weight management plan initiated'},{date:'May 5, 2024',type:'Lab / Wellness Visit',provider:'Dr. Linda Park',note:'Annual labs, HbA1c 7.8%'}],
+    labs:[{name:'HbA1c',value:'7.8%',flag:'warn',ref:'<7.0%',date:'May 2024'},{name:'LDL',value:'112 mg/dL',flag:'warn',ref:'<100',date:'Oct 2024'},{name:'BP (latest)',value:'148/92 mmHg',flag:'hi',ref:'<130/80',date:'Oct 2024'},{name:'BMI',value:'33.4',flag:'warn',ref:'18.5–24.9',date:'Oct 2024'},{name:'Potassium',value:'4.0 mEq/L',flag:'ok',ref:'3.5–5.1',date:'Oct 2024'}]
+  },
+  'INF-004182':{
+    conditions:[{name:'Essential Hypertension',code:'I10'},{name:'Mixed Hyperlipidemia',code:'E78.2'}],
+    medications:[{name:'Amlodipine',dose:'5 mg',freq:'Once daily'},{name:'Rosuvastatin',dose:'10 mg',freq:'Once nightly'},{name:'Aspirin',dose:'81 mg',freq:'Once daily'}],
+    encounters:[{date:'Sep 14, 2024',type:'PCP Office Visit',provider:'Dr. James Wilson',note:'Annual physical, BP well controlled'},{date:'Mar 10, 2024',type:'Lab Check',provider:'Dr. James Wilson',note:'Fasting lipid panel, LDL 119'}],
+    labs:[{name:'LDL',value:'119 mg/dL',flag:'warn',ref:'<100',date:'Mar 2024'},{name:'Total Cholesterol',value:'198 mg/dL',flag:'ok',ref:'<200',date:'Mar 2024'},{name:'BP (latest)',value:'126/80 mmHg',flag:'ok',ref:'<130/80',date:'Sep 2024'},{name:'eGFR',value:'74',flag:'ok',ref:'>60',date:'Mar 2024'}]
+  },
+  'INF-005027':{
+    conditions:[{name:'Major Depressive Disorder, recurrent',code:'F33.1'},{name:'Essential Hypertension',code:'I10'}],
+    medications:[{name:'Sertraline',dose:'100 mg',freq:'Once daily'},{name:'Lisinopril',dose:'5 mg',freq:'Once daily'},{name:'Clonazepam',dose:'0.5 mg',freq:'PRN anxiety'},{name:'Melatonin',dose:'5 mg',freq:'At bedtime'}],
+    encounters:[{date:'Nov 1, 2024',type:'Psychiatry Follow-up',provider:'Dr. M. Osei',note:'PHQ-9 score 7, stable on sertraline'},{date:'Aug 20, 2024',type:'PCP Office Visit',provider:'Dr. Sarah Kim',note:'AWV due, BP 128/78'},{date:'Apr 15, 2024',type:'Therapy Session',provider:'LCSW J. Brown',note:'CBT session, sleep hygiene addressed'}],
+    labs:[{name:'PHQ-9 Score',value:'7 (Mild)',flag:'warn',ref:'<5',date:'Nov 2024'},{name:'BP (latest)',value:'128/78 mmHg',flag:'ok',ref:'<130/80',date:'Aug 2024'},{name:'TSH',value:'2.1 mIU/L',flag:'ok',ref:'0.4–4.0',date:'Aug 2024'},{name:'CMP (BMP)',value:'WNL',flag:'ok',ref:'Normal',date:'Aug 2024'}]
+  },
+  'INF-006341':{
+    conditions:[{name:'Pure Hypercholesterolemia',code:'E78.00'}],
+    medications:[{name:'Atorvastatin',dose:'10 mg',freq:'Once nightly'}],
+    encounters:[{date:'Jun 3, 2024',type:'PCP Annual Physical',provider:'Dr. James Wilson',note:'Healthy, statin therapy continued'},{date:'Jun 3, 2024',type:'Lab Work',provider:'Quest Diagnostics',note:'Fasting lipid panel drawn'}],
+    labs:[{name:'LDL',value:'94 mg/dL',flag:'ok',ref:'<100',date:'Jun 2024'},{name:'Total Cholesterol',value:'172 mg/dL',flag:'ok',ref:'<200',date:'Jun 2024'},{name:'BP (latest)',value:'118/74 mmHg',flag:'ok',ref:'<130/80',date:'Jun 2024'},{name:'BMI',value:'24.1',flag:'ok',ref:'18.5–24.9',date:'Jun 2024'}]
+  },
+  'INF-007582':{
+    conditions:[{name:'Chronic Obstructive Pulmonary Disease',code:'J44.1'},{name:'Allergic Asthma, moderate persistent',code:'J45.40'},{name:'Osteoporosis without fracture',code:'M81.0'}],
+    medications:[{name:'Tiotropium',dose:'18 mcg',freq:'Once daily (inhaled)'},{name:'Fluticasone/Salmeterol',dose:'250/50 mcg',freq:'Twice daily (inhaled)'},{name:'Albuterol',dose:'90 mcg/puff',freq:'PRN'},{name:'Alendronate',dose:'70 mg',freq:'Once weekly'},{name:'Calcium Carbonate',dose:'600 mg',freq:'Twice daily'},{name:'Vitamin D3',dose:'2000 IU',freq:'Once daily'},{name:'Montelukast',dose:'10 mg',freq:'Once nightly'},{name:'Prednisone',dose:'5 mg',freq:'PRN exacerbation'},{name:'Fluticasone nasal',dose:'50 mcg',freq:'Twice daily (nasal)'}],
+    encounters:[{date:'Nov 10, 2024',type:'Pulmonology',provider:'Dr. R. Chen',note:'FEV1 62%, mild exacerbation managed'},{date:'Sep 25, 2024',type:'PCP Office Visit',provider:'Dr. Rachel Torres',note:'Bone density follow-up overdue'},{date:'Jun 18, 2024',type:'ED Visit',provider:'Memorial Hospital ED',note:'Asthma exacerbation, nebulizer treatment'}],
+    labs:[{name:'FEV1',value:'62% predicted',flag:'warn',ref:'>80%',date:'Nov 2024'},{name:'SpO2 (resting)',value:'95%',flag:'warn',ref:'>97%',date:'Nov 2024'},{name:'Bone Density (T-score)',value:'-2.7',flag:'hi',ref:'>-1.0',date:'Jan 2023 (overdue)'},{name:'IgE',value:'184 IU/mL',flag:'warn',ref:'<100',date:'Sep 2024'}]
+  },
+  'INF-008291':{
+    conditions:[{name:'Type 2 Diabetes Mellitus',code:'E11.9'},{name:'Major Depressive Disorder',code:'F33.0'}],
+    medications:[{name:'Metformin HCl',dose:'1000 mg',freq:'Twice daily'},{name:'Bupropion',dose:'150 mg',freq:'Once daily'},{name:'Glipizide',dose:'5 mg',freq:'Once daily'},{name:'Aspirin',dose:'81 mg',freq:'Once daily'},{name:'Vitamin D3',dose:'1000 IU',freq:'Once daily'}],
+    encounters:[{date:'Oct 5, 2024',type:'PCP Office Visit',provider:'Dr. Monica Chen',note:'HbA1c 8.2%, medication adjustment'},{date:'Aug 12, 2024',type:'Behavioral Health',provider:'LCSW R. Fuentes',note:'PHQ-9 score 9, therapy initiated'},{date:'Mar 20, 2024',type:'Lab Work',provider:'LabCorp',note:'Annual metabolic panel'}],
+    labs:[{name:'HbA1c',value:'8.2%',flag:'hi',ref:'<7.0%',date:'Oct 2024'},{name:'PHQ-9 Score',value:'9 (Moderate)',flag:'hi',ref:'<5',date:'Aug 2024'},{name:'eGFR',value:'68',flag:'ok',ref:'>60',date:'Mar 2024'},{name:'LDL',value:'102 mg/dL',flag:'warn',ref:'<100',date:'Mar 2024'},{name:'Fasting Glucose',value:'164 mg/dL',flag:'hi',ref:'70–99',date:'Oct 2024'}]
+  },
+  'INF-009104':{
+    conditions:[{name:'Essential Hypertension',code:'I10'}],
+    medications:[{name:'Hydrochlorothiazide',dose:'25 mg',freq:'Once daily'},{name:'Metoprolol Tartrate',dose:'25 mg',freq:'Twice daily'}],
+    encounters:[{date:'Jul 22, 2024',type:'PCP Office Visit',provider:'Dr. Linda Park',note:'BP 132/80, controlled'},{date:'Jan 10, 2024',type:'Annual Wellness Visit',provider:'Dr. Linda Park',note:'Mammography referral placed (pending)'}],
+    labs:[{name:'BP (latest)',value:'132/80 mmHg',flag:'ok',ref:'<130/80',date:'Jul 2024'},{name:'Total Cholesterol',value:'188 mg/dL',flag:'ok',ref:'<200',date:'Jan 2024'},{name:'eGFR',value:'72',flag:'ok',ref:'>60',date:'Jan 2024'},{name:'HbA1c',value:'5.4%',flag:'ok',ref:'<5.7%',date:'Jan 2024'}]
+  },
+  'INF-010473':{
+    conditions:[{name:'Chronic Heart Failure, systolic',code:'I50.22'},{name:'Type 2 Diabetes Mellitus, uncontrolled',code:'E11.65'},{name:'Chronic Kidney Disease, Stage 4',code:'N18.4'},{name:'Atrial Fibrillation, persistent',code:'I48.11'},{name:'Essential Hypertension',code:'I10'}],
+    medications:[{name:'Apixaban',dose:'5 mg',freq:'Twice daily'},{name:'Carvedilol',dose:'12.5 mg',freq:'Twice daily'},{name:'Furosemide',dose:'80 mg',freq:'Twice daily'},{name:'Spironolactone',dose:'25 mg',freq:'Once daily'},{name:'Insulin Glargine',dose:'30 units',freq:'Once nightly'},{name:'Insulin Aspart',dose:'8 units',freq:'With meals'},{name:'Amlodipine',dose:'5 mg',freq:'Once daily'},{name:'Atorvastatin',dose:'40 mg',freq:'Once nightly'},{name:'Sodium Bicarb',dose:'650 mg',freq:'Three times daily'},{name:'Erythropoietin (Epoetin)',dose:'4000 units',freq:'3×/week SC'},{name:'Vitamin D3',dose:'2000 IU',freq:'Once daily'},{name:'Aspirin',dose:'81 mg',freq:'Once daily'},{name:'KCl (Potassium)',dose:'20 mEq',freq:'Once daily'}],
+    encounters:[{date:'Nov 18, 2024',type:'Nephrology',provider:'Dr. A. Kapoor',note:'CKD Stage 4, eGFR 24 — dialysis planning initiated'},{date:'Nov 10, 2024',type:'Cardiology',provider:'Dr. E. Wallace',note:'CHF Class III, fluid overload managed'},{date:'Oct 5, 2024',type:'PCP Office Visit',provider:'Dr. Kevin Murphy',note:'Complex care coordination, all specialists alerted'}],
+    labs:[{name:'eGFR',value:'24',flag:'hi',ref:'>60',date:'Nov 2024'},{name:'HbA1c',value:'9.4%',flag:'hi',ref:'<7.0%',date:'Oct 2024'},{name:'BNP',value:'1840 pg/mL',flag:'hi',ref:'<100',date:'Nov 2024'},{name:'Creatinine',value:'3.2 mg/dL',flag:'hi',ref:'0.7–1.2',date:'Nov 2024'},{name:'Potassium',value:'5.4 mEq/L',flag:'hi',ref:'3.5–5.1',date:'Nov 2024'},{name:'Hemoglobin',value:'9.8 g/dL',flag:'hi',ref:'12–16',date:'Nov 2024'}]
+  }
+};
+
+/* ─── MODAL STATE ─── */
+let activeMemberIdx = null;
+let selectedChannel = 'phone';
+
+/* ─── TOAST ─── */
+function showToast(msg){
+  const container = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className='toast';
+  t.innerHTML=`<svg class="toast-icon" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="9" r="7.5"/><polyline points="5.5,9 7.5,11.5 12.5,6.5"/></svg><span class="toast-msg">${msg}</span>`;
+  container.appendChild(t);
+  setTimeout(()=>{t.classList.add('hiding');setTimeout(()=>t.remove(),280)},3000);
+}
+
+/* ─── MODAL HELPERS ─── */
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function overlayClose(e,id){if(e.target===document.getElementById(id)) closeModal(id)}
+
+/* ─── CARE PLAN MODAL ─── */
+function openCarePlanModal(){
+  const m = MEMBERS[activeMemberIdx];
+  if(!m) return;
+  const rc = m.risk==='High'?'risk-high':m.risk==='Medium'?'risk-med':'risk-low';
+  document.getElementById('cp-member-sub').innerHTML =
+    `${m.name} &nbsp;<span class="modal-badge ${rc}">${m.risk} Risk</span>`;
+  const goalsDiv = document.getElementById('cp-goals');
+  if(m.gaps.length===0){
+    goalsDiv.innerHTML='<div style="font-size:12px;color:var(--muted);padding:8px 0">No open care gaps — all goals met.</div>';
+  } else {
+    goalsDiv.innerHTML = m.gaps.map((g,i)=>`
+      <label class="modal-goal">
+        <input type="checkbox" checked id="goal-${i}"/>
+        <span class="modal-goal-text">${g}</span>
+      </label>`).join('');
+  }
+  document.getElementById('cp-assigned').value='';
+  document.getElementById('cp-notes').value='';
+  openModal('modal-careplan');
+}
+function saveCarePlan(){
+  closeModal('modal-careplan');
+  showToast('Care plan saved for '+(MEMBERS[activeMemberIdx]?.name||'member'));
+}
+
+/* ─── OUTREACH MODAL ─── */
+function openOutreachModal(){
+  const m = MEMBERS[activeMemberIdx];
+  if(!m) return;
+  document.getElementById('or-member-sub').textContent = m.name;
+  document.getElementById('or-reason').value = m.gaps[0]||'General wellness check-in';
+  document.getElementById('or-notes').value='';
+  // default date = tomorrow
+  const d=new Date(); d.setDate(d.getDate()+1);
+  document.getElementById('or-date').value=d.toISOString().slice(0,10);
+  document.getElementById('or-time').value='10:00';
+  selectChannel('phone');
+  openModal('modal-outreach');
+}
+function selectChannel(ch){
+  selectedChannel=ch;
+  ['phone','sms','portal'].forEach(c=>{
+    document.getElementById('ch-'+c).classList.toggle('selected',c===ch);
+  });
+}
+function scheduleOutreach(){
+  const date=document.getElementById('or-date').value;
+  const time=document.getElementById('or-time').value;
+  closeModal('modal-outreach');
+  showToast(`Outreach scheduled for ${date} at ${time}`);
+}
+
+/* ─── FHIR RECORD MODAL ─── */
+function openFhirModal(){
+  const m = MEMBERS[activeMemberIdx];
+  if(!m) return;
+  const d = FHIR_DATA[m.id];
+  document.getElementById('fhir-member-sub').textContent=`${m.name} · ${m.id} · ${m.plan}`;
+  const flagCls={hi:'lab-hi',warn:'lab-warn',ok:'lab-ok'};
+  document.getElementById('fhir-body').innerHTML=`
+    <div class="fhir-section">
+      <div class="fhir-section-title">Active Conditions</div>
+      ${d.conditions.map(c=>`<div class="fhir-row"><span class="fhir-row-label">${c.name}</span><span class="fhir-row-code">${c.code}</span></div>`).join('')}
+    </div>
+    <div class="fhir-section">
+      <div class="fhir-section-title">Active Medications (${d.medications.length})</div>
+      ${d.medications.map(med=>`<div class="fhir-row"><span class="fhir-row-label">${med.name} <span style="font-weight:400;color:var(--muted)">${med.dose}</span></span><span class="fhir-row-val">${med.freq}</span></div>`).join('')}
+    </div>
+    <div class="fhir-section">
+      <div class="fhir-section-title">Recent Encounters</div>
+      ${d.encounters.map(e=>`<div class="fhir-row" style="align-items:flex-start;gap:0"><div style="flex:1"><div class="fhir-row-label">${e.type}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${e.note}</div></div><div style="text-align:right;flex-shrink:0;padding-left:12px"><div style="font-size:11px;font-weight:600;color:var(--text)">${e.date}</div><div style="font-size:10px;color:var(--muted)">${e.provider}</div></div></div>`).join('')}
+    </div>
+    <div class="fhir-section">
+      <div class="fhir-section-title">Key Lab Values</div>
+      ${d.labs.map(l=>`<div class="fhir-row"><span class="fhir-row-label">${l.name}</span><span class="fhir-row-code">${l.date}</span><span class="fhir-row-val lab-val ${flagCls[l.flag]||''}">${l.value} <span style="font-size:10px;font-weight:400;color:var(--muted)">(ref: ${l.ref})</span></span></div>`).join('')}
+    </div>`;
+  openModal('modal-fhir');
 }
 
 /* ─── INIT ─── */
