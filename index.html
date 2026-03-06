@@ -621,6 +621,7 @@ body{display:flex;flex-direction:column;overflow:hidden}
       <table class="hedis-table">
         <thead>
           <tr>
+            <th>Code</th>
             <th>Measure</th>
             <th>Category</th>
             <th>Rate</th>
@@ -944,18 +945,12 @@ const MEMBERS = [
 ];
 
 const HEDIS_DATA = [
-  {name:'Diabetes Care — HbA1c Control',cat:'Chronic',rate:68,benchmark:72,gaps:1842,trend:'+2.1%',status:'needs'},
-  {name:'Controlling High Blood Pressure',cat:'Chronic',rate:75,benchmark:71,gaps:892,trend:'+4.3%',status:'above'},
-  {name:'Breast Cancer Screening',cat:'Preventive',rate:71,benchmark:73,gaps:1203,trend:'+1.8%',status:'needs'},
-  {name:'Colorectal Cancer Screening',cat:'Preventive',rate:64,benchmark:68,gaps:2401,trend:'+3.2%',status:'needs'},
-  {name:'Annual Wellness Visit (Medicare)',cat:'Preventive',rate:82,benchmark:78,gaps:541,trend:'+6.1%',status:'above'},
-  {name:'Medication Adherence — RASA',cat:'Medication',rate:86,benchmark:82,gaps:312,trend:'+1.4%',status:'above'},
-  {name:'Medication Adherence — Diabetes',cat:'Medication',rate:77,benchmark:80,gaps:1102,trend:'-0.8%',status:'needs'},
-  {name:'Depression Screening (PHQ-9)',cat:'Behavioral',rate:69,benchmark:74,gaps:1834,trend:'+5.2%',status:'needs'},
-  {name:'Child/Adolescent Immunizations',cat:'Preventive',rate:88,benchmark:84,gaps:201,trend:'+2.0%',status:'above'},
-  {name:'Osteoporosis Management',cat:'Chronic',rate:59,benchmark:65,gaps:987,trend:'+1.1%',status:'needs'},
-  {name:'COPD / Spirometry Testing',cat:'Chronic',rate:72,benchmark:70,gaps:443,trend:'+3.8%',status:'above'},
-  {name:'Statin Therapy — CVD',cat:'Medication',rate:91,benchmark:88,gaps:189,trend:'+0.9%',status:'above'},
+  {code:'CDC_HBA1C', name:'Comprehensive Diabetes Care — HbA1c Control (<8%)',     cat:'Chronic',    rate:62, benchmark:68, gaps:2314, trend:'+2.1%', status:'needs'},
+  {code:'CDC_BP',    name:'Comprehensive Diabetes Care — BP Control (<140/90)',     cat:'Chronic',    rate:71, benchmark:72, gaps:918,  trend:'+3.4%', status:'needs'},
+  {code:'CBP',       name:'Controlling High Blood Pressure (<140/90)',              cat:'Chronic',    rate:76, benchmark:74, gaps:741,  trend:'+4.8%', status:'above'},
+  {code:'COL',       name:'Colorectal Cancer Screening (Adults 46–75)',             cat:'Preventive', rate:64, benchmark:70, gaps:2847, trend:'+3.2%', status:'needs'},
+  {code:'BCS',       name:'Breast Cancer Screening (Women 52–74)',                  cat:'Preventive', rate:70, benchmark:74, gaps:1203, trend:'+1.8%', status:'needs'},
+  {code:'MED_PDC',   name:'Medication Adherence — Hypertension (PDC ≥80%)',         cat:'Medication', rate:83, benchmark:80, gaps:614,  trend:'+1.4%', status:'above'},
 ];
 
 const MONTHS = ['Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan'];
@@ -987,6 +982,7 @@ function renderHedisTable(){
       : '<span class="status-chip" style="background:#FEF3C7;color:#B45309">Needs Work</span>';
     const tc = r.trend.startsWith('+') ? 'color:var(--green)' : 'color:var(--red)';
     return `<tr>
+      <td><code style="font-size:11px;font-weight:700;color:var(--blue2);background:var(--ltblue);padding:2px 7px;border-radius:5px;white-space:nowrap">${r.code}</code></td>
       <td style="font-weight:600">${r.name}</td>
       <td><span class="card-badge badge-blue">${r.cat}</span></td>
       <td style="font-weight:700">${r.rate}%</td>
@@ -1088,10 +1084,10 @@ function initChartsFor(v){
 function initOverviewCharts(){
   // HEDIS bar
   mkChart('hedisChart',{type:'bar',data:{
-    labels:['Diabetes\nHbA1c','BP\nControl','Breast\nScreening','Colorectal','AWV','RASA\nAdherence','Depression\nScreen'],
+    labels:['CDC_HBA1C','CDC_BP','CBP','COL','BCS','MED_PDC'],
     datasets:[
-      {label:'Rate',data:[68,75,71,64,82,86,69],backgroundColor:BLUE+'CC',borderRadius:5,borderSkipped:false},
-      {label:'Benchmark',data:[72,71,73,68,78,82,74],backgroundColor:'transparent',borderColor:TEAL,borderWidth:2,type:'line',pointRadius:4,pointBackgroundColor:TEAL}
+      {label:'Rate',data:[62,71,76,64,70,83],backgroundColor:BLUE+'CC',borderRadius:5,borderSkipped:false},
+      {label:'Benchmark',data:[68,72,74,70,74,80],backgroundColor:'transparent',borderColor:TEAL,borderWidth:2,type:'line',pointRadius:5,pointBackgroundColor:TEAL}
     ]
   },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:11},boxWidth:12}},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.raw}%`}}},scales:{y:{min:50,max:100,grid:{color:'#EEF2F7'},ticks:{callback:v=>v+'%',font:{size:11}}},x:{grid:{display:false},ticks:{font:{size:10}}}}}});
 
