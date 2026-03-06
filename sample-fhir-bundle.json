@@ -1,0 +1,228 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "member-001",
+        "name": [{ "family": "Ramirez", "given": ["Carlos"] }],
+        "birthDate": "1968-04-15",
+        "gender": "male"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-001",
+        "clinicalStatus": { "coding": [{ "code": "active" }] },
+        "code": {
+          "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "E11.9", "display": "Type 2 Diabetes Mellitus" }],
+          "text": "Type 2 Diabetes Mellitus"
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-002",
+        "clinicalStatus": { "coding": [{ "code": "active" }] },
+        "code": {
+          "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "I10", "display": "Essential Hypertension" }],
+          "text": "Essential Hypertension"
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-003",
+        "clinicalStatus": { "coding": [{ "code": "active" }] },
+        "code": {
+          "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "E78.5", "display": "Hyperlipidemia" }],
+          "text": "Hyperlipidemia"
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-004",
+        "clinicalStatus": { "coding": [{ "code": "active" }] },
+        "code": {
+          "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "N18.3", "display": "Chronic Kidney Disease Stage 3" }],
+          "text": "Chronic Kidney Disease Stage 3"
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-005",
+        "clinicalStatus": { "coding": [{ "code": "active" }] },
+        "code": {
+          "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "J44.1", "display": "COPD with Acute Exacerbation" }],
+          "text": "COPD"
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-hba1c",
+        "status": "final",
+        "code": {
+          "coding": [{ "system": "http://loinc.org", "code": "4548-4", "display": "Hemoglobin A1c/Hemoglobin.total in Blood" }]
+        },
+        "valueQuantity": { "value": 9.2, "unit": "%" },
+        "interpretation": [{ "coding": [{ "code": "H", "display": "High" }] }],
+        "effectiveDateTime": "2025-11-10"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-bp-sys",
+        "status": "final",
+        "code": {
+          "coding": [{ "system": "http://loinc.org", "code": "8480-6", "display": "Systolic Blood Pressure" }]
+        },
+        "valueQuantity": { "value": 152, "unit": "mmHg" },
+        "interpretation": [{ "coding": [{ "code": "H", "display": "High" }] }],
+        "effectiveDateTime": "2025-11-10"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-bp-dia",
+        "status": "final",
+        "code": {
+          "coding": [{ "system": "http://loinc.org", "code": "8462-4", "display": "Diastolic Blood Pressure" }]
+        },
+        "valueQuantity": { "value": 94, "unit": "mmHg" },
+        "interpretation": [{ "coding": [{ "code": "H", "display": "High" }] }],
+        "effectiveDateTime": "2025-11-10"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-egfr",
+        "status": "final",
+        "code": {
+          "coding": [{ "system": "http://loinc.org", "code": "62238-1", "display": "eGFR" }]
+        },
+        "valueQuantity": { "value": 38, "unit": "mL/min/1.73m2" },
+        "interpretation": [{ "coding": [{ "code": "L", "display": "Low" }] }],
+        "effectiveDateTime": "2025-10-05"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obs-ldl",
+        "status": "final",
+        "code": {
+          "coding": [{ "system": "http://loinc.org", "code": "18262-6", "display": "LDL Cholesterol" }]
+        },
+        "valueQuantity": { "value": 168, "unit": "mg/dL" },
+        "interpretation": [{ "coding": [{ "code": "H", "display": "High" }] }],
+        "effectiveDateTime": "2025-10-05"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "med-001",
+        "status": "stopped",
+        "medicationCodeableConcept": {
+          "coding": [{ "code": "83367", "display": "Atorvastatin 40mg" }],
+          "text": "Atorvastatin 40mg (statin)"
+        },
+        "note": [{ "text": "Patient stopped due to muscle pain" }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "med-002",
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [{ "code": "197361", "display": "Metformin 1000mg" }],
+          "text": "Metformin 1000mg"
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "med-003",
+        "status": "active",
+        "medicationCodeableConcept": {
+          "coding": [{ "code": "214354", "display": "Lisinopril 10mg" }],
+          "text": "Lisinopril 10mg"
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "med-004",
+        "status": "cancelled",
+        "medicationCodeableConcept": {
+          "coding": [{ "code": "310798", "display": "Insulin Glargine 100 units/mL" }],
+          "text": "Insulin Glargine 100 units/mL"
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "enc-ed-001",
+        "class": { "code": "EMER", "display": "Emergency" },
+        "period": { "start": "2025-08-14", "end": "2025-08-14" },
+        "reasonCode": [{ "text": "Hyperglycemic episode" }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "enc-ed-002",
+        "class": { "code": "EMER", "display": "Emergency" },
+        "period": { "start": "2025-10-22", "end": "2025-10-22" },
+        "reasonCode": [{ "text": "COPD exacerbation" }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "enc-ip-001",
+        "class": { "code": "IMP", "display": "Inpatient" },
+        "period": { "start": "2025-09-03", "end": "2025-09-06" },
+        "reasonCode": [{ "text": "Acute COPD exacerbation" }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "enc-amb-001",
+        "class": { "code": "AMB", "display": "Ambulatory" },
+        "period": { "start": "2025-11-10", "end": "2025-11-10" },
+        "reasonCode": [{ "text": "Routine diabetes follow-up" }]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "proc-001",
+        "status": "completed",
+        "code": {
+          "coding": [{ "system": "http://www.ama-assn.org/go/cpt", "code": "99213", "display": "Office Visit" }],
+          "text": "Office Visit"
+        },
+        "performedDateTime": "2025-11-10"
+      }
+    }
+  ]
+}

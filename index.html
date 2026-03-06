@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FHIR Clinical Analytics Accelerator — Infinite</title>
+<style>
+  :root {
+    --navy:   #1B4774;
+    --blue1:  #014BBC;
+    --blue2:  #169AD2;
+    --teal:   #32D1E3;
+    --teal2:  #00B9A6;
+    --ltblue: #CBEAFA;
+    --white:  #FFFFFF;
+    --gray:   #F5F7FA;
+    --graymd: #44546A;
+    --red:    #C0392B;
+    --orange: #E67E22;
+    --green:  #27AE60;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #EEF2F7; color: #1a1a2e; }
+
+  /* ── Header ── */
+  .header {
+    background: var(--navy);
+    padding: 0 32px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+  .header-left { display: flex; align-items: center; gap: 18px; }
+  .logo-box {
+    background: var(--white);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: 1px;
+  }
+  .logo-box span { color: var(--blue2); }
+  .header-title { color: var(--white); font-size: 15px; font-weight: 500; opacity: 0.9; }
+  .header-badge {
+    background: var(--teal2);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Layout ── */
+  .main { display: grid; grid-template-columns: 340px 1fr; gap: 20px; padding: 20px 28px; max-width: 1400px; margin: 0 auto; }
+
+  /* ── Panel ── */
+  .panel { background: var(--white); border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); overflow: hidden; }
+  .panel-header { background: var(--navy); color: white; padding: 12px 18px; font-size: 13px; font-weight: 600; letter-spacing: 0.3px; display: flex; align-items: center; gap: 8px; }
+  .panel-header .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); }
+  .panel-body { padding: 16px; }
+
+  /* ── Input Area ── */
+  .input-label { font-size: 12px; font-weight: 600; color: var(--graymd); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  textarea {
+    width: 100%; height: 320px; border: 1.5px solid #D0D7E5; border-radius: 6px;
+    padding: 10px; font-size: 11.5px; font-family: 'Consolas', 'Courier New', monospace;
+    resize: vertical; color: #1a1a2e; background: #FAFBFC; line-height: 1.5;
+    transition: border-color 0.2s;
+  }
+  textarea:focus { outline: none; border-color: var(--blue2); }
+  .btn-row { display: flex; gap: 10px; margin-top: 12px; }
+  .btn {
+    padding: 10px 18px; border: none; border-radius: 6px; font-size: 13px;
+    font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit;
+  }
+  .btn-primary { background: var(--blue1); color: white; flex: 1; }
+  .btn-primary:hover { background: var(--navy); }
+  .btn-primary:disabled { background: #9BB5D5; cursor: not-allowed; }
+  .btn-secondary { background: var(--gray); color: var(--navy); border: 1.5px solid #D0D7E5; }
+  .btn-secondary:hover { background: var(--ltblue); }
+
+  /* ── Status Bar ── */
+  .status-bar {
+    margin-top: 12px; padding: 10px 14px; border-radius: 6px;
+    font-size: 12.5px; font-weight: 500; display: none;
+  }
+  .status-loading { background: #EBF5FF; color: var(--blue1); border: 1px solid #B8D9F5; display: flex; align-items: center; gap: 8px; }
+  .status-error   { background: #FEF0EF; color: var(--red);  border: 1px solid #FADBD8; }
+  .spinner { width: 14px; height: 14px; border: 2px solid #B8D9F5; border-top-color: var(--blue1); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Results ── */
+  .results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .results-full  { grid-column: 1 / -1; }
+
+  /* ── Member Card ── */
+  .member-card { background: var(--navy); border-radius: 10px; padding: 18px 20px; color: white; display: flex; justify-content: space-between; align-items: center; }
+  .member-name  { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .member-meta  { font-size: 12.5px; opacity: 0.8; }
+  .member-meta span { margin-right: 16px; }
+  .risk-badge {
+    padding: 10px 22px; border-radius: 30px; font-size: 15px;
+    font-weight: 700; text-align: center; min-width: 110px;
+  }
+  .risk-HIGH   { background: #C0392B; color: white; }
+  .risk-MEDIUM { background: #E67E22; color: white; }
+  .risk-LOW    { background: #27AE60; color: white; }
+
+  /* ── Score Bar ── */
+  .score-section { margin-top: 12px; }
+  .score-label { font-size: 11px; color: rgba(255,255,255,0.7); margin-bottom: 6px; }
+  .score-bar-track { background: rgba(255,255,255,0.15); border-radius: 4px; height: 8px; width: 100%; }
+  .score-bar-fill  { height: 8px; border-radius: 4px; transition: width 0.8s ease; }
+
+  /* ── Components ── */
+  .component-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--gray); }
+  .component-row:last-child { border: none; }
+  .component-label { font-size: 12px; color: var(--graymd); flex: 1; }
+  .component-bar-track { width: 100px; height: 6px; background: #E8EDF5; border-radius: 3px; }
+  .component-bar-fill  { height: 6px; border-radius: 3px; background: var(--blue2); }
+  .component-val { font-size: 12px; font-weight: 600; color: var(--navy); width: 36px; text-align: right; }
+
+  /* ── HEDIS Table ── */
+  .hedis-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .hedis-table th { background: var(--navy); color: white; padding: 9px 12px; text-align: left; font-weight: 600; font-size: 11.5px; letter-spacing: 0.3px; }
+  .hedis-table td { padding: 9px 12px; border-bottom: 1px solid #EEF2F7; vertical-align: middle; }
+  .hedis-table tr:hover td { background: #F7FAFD; }
+  .measure-id { font-family: 'Consolas', monospace; font-size: 11px; background: var(--ltblue); color: var(--navy); padding: 2px 7px; border-radius: 4px; font-weight: 700; }
+  .gap-open   { background: #FADBD8; color: #C0392B; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+  .gap-closed { background: #D5F5E3; color: #27AE60; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+
+  /* ── Summary Pills ── */
+  .pill-list { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
+  .pill { padding: 4px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 500; }
+  .pill-condition { background: #EBF5FF; color: var(--blue1); border: 1px solid #B8D9F5; }
+  .pill-med       { background: #E8F8F5; color: #1A7A6A; border: 1px solid #A8D8CF; }
+  .pill-lab       { background: #FEF9E7; color: #9B6E0E; border: 1px solid #F5D87A; }
+
+  /* ── Placeholder ── */
+  .placeholder { text-align: center; padding: 60px 20px; color: #A0AABB; }
+  .placeholder-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
+  .placeholder-text { font-size: 14px; font-weight: 500; }
+  .placeholder-sub  { font-size: 12px; margin-top: 6px; }
+
+  /* ── Section titles ── */
+  .section-title { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .section-title::after { content: ''; flex: 1; height: 1px; background: var(--ltblue); }
+
+  /* ── Lab row ── */
+  .lab-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--gray); }
+  .lab-row:last-child { border: none; }
+  .lab-name { font-size: 12.5px; color: var(--graymd); }
+  .lab-val  { font-size: 13px; font-weight: 600; color: var(--navy); }
+
+  /* ── Footer ── */
+  .footer { text-align: center; padding: 16px; font-size: 11px; color: #8899AA; margin-top: 4px; }
+  .footer strong { color: var(--navy); }
+</style>
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────────────────── -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo-box">in<span>finite</span></div>
+    <div class="header-title">FHIR Clinical Analytics Accelerator</div>
+  </div>
+  <div class="header-badge">POC · EDA RFP · Elevance Health</div>
+</div>
+
+<!-- ── Main Layout ──────────────────────────────────────────────────── -->
+<div class="main">
+
+  <!-- LEFT: Input Panel -->
+  <div>
+    <div class="panel">
+      <div class="panel-header"><div class="dot"></div>FHIR R4 Bundle Input</div>
+      <div class="panel-body">
+        <div class="input-label">Paste FHIR Bundle JSON</div>
+        <textarea id="bundleInput" placeholder='{ "resourceType": "Bundle", "entry": [...] }'></textarea>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" id="analyzeBtn" onclick="analyze()">▶ Run Analysis</button>
+          <button class="btn btn-secondary" onclick="loadSample()">Load Sample</button>
+        </div>
+
+        <div class="status-bar status-loading" id="statusLoading">
+          <div class="spinner"></div>
+          Running HEDIS &amp; Risk pipeline…
+        </div>
+        <div class="status-bar status-error" id="statusError"></div>
+      </div>
+    </div>
+
+    <!-- Pipeline Steps info -->
+    <div class="panel" style="margin-top:16px;">
+      <div class="panel-header"><div class="dot"></div>Pipeline Steps</div>
+      <div class="panel-body">
+        <div style="font-size:12px; color:var(--graymd); line-height:1.8;">
+          <div>① <strong style="color:var(--navy)">FHIR Extraction</strong> — Parse R4 resources</div>
+          <div>② <strong style="color:var(--navy)">CDM Transform</strong> — ICD-10 · LOINC · RxNorm</div>
+          <div>③ <strong style="color:var(--navy)">HEDIS Engine</strong> — 6 quality measures</div>
+          <div>④ <strong style="color:var(--navy)">Risk Stratification</strong> — Weighted composite score</div>
+        </div>
+        <div style="margin-top:12px; padding:10px; background:var(--gray); border-radius:6px; font-size:11px; color:var(--graymd);">
+          <strong style="color:var(--navy);">Backend:</strong> Spring Boot · Spring Batch · PostgreSQL CDM<br/>
+          <strong style="color:var(--navy);">Standards:</strong> HL7 FHIR R4 · NCQA HEDIS 2024 · ICD-10 · LOINC
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Results Panel -->
+  <div id="resultsArea">
+    <div class="panel" style="height:100%;">
+      <div class="panel-header"><div class="dot"></div>Member Intelligence Report</div>
+      <div class="panel-body">
+        <div class="placeholder" id="placeholder">
+          <div class="placeholder-icon">⚕</div>
+          <div class="placeholder-text">No member analyzed yet</div>
+          <div class="placeholder-sub">Load sample data or paste a FHIR bundle to begin</div>
+        </div>
+        <div id="results" style="display:none;"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <strong>Infinite Computer Solutions</strong> · FHIR Clinical Analytics Accelerator · Prototype v1.0 · © 2026 Infinite Confidential
+</div>
+
+<script>
+// ── Sample bundle (embedded so it works without a server) ──────────────
+const SAMPLE_BUNDLE = {
+  "resourceType": "Bundle", "type": "collection",
+  "entry": [
+    { "resource": { "resourceType": "Patient", "id": "member-001", "name": [{ "family": "Ramirez", "given": ["Carlos"] }], "birthDate": "1968-04-15", "gender": "male" }},
+    { "resource": { "resourceType": "Condition", "clinicalStatus": { "coding": [{ "code": "active" }] }, "code": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "E11.9", "display": "Type 2 Diabetes Mellitus" }], "text": "Type 2 Diabetes Mellitus" }}},
+    { "resource": { "resourceType": "Condition", "clinicalStatus": { "coding": [{ "code": "active" }] }, "code": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "I10", "display": "Essential Hypertension" }], "text": "Essential Hypertension" }}},
+    { "resource": { "resourceType": "Condition", "clinicalStatus": { "coding": [{ "code": "active" }] }, "code": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "E78.5", "display": "Hyperlipidemia" }], "text": "Hyperlipidemia" }}},
+    { "resource": { "resourceType": "Condition", "clinicalStatus": { "coding": [{ "code": "active" }] }, "code": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "N18.3", "display": "Chronic Kidney Disease Stage 3" }], "text": "Chronic Kidney Disease Stage 3" }}},
+    { "resource": { "resourceType": "Condition", "clinicalStatus": { "coding": [{ "code": "active" }] }, "code": { "coding": [{ "system": "http://hl7.org/fhir/sid/icd-10-cm", "code": "J44.1", "display": "COPD" }], "text": "COPD" }}},
+    { "resource": { "resourceType": "Observation", "status": "final", "code": { "coding": [{ "system": "http://loinc.org", "code": "4548-4", "display": "HbA1c" }] }, "valueQuantity": { "value": 9.2, "unit": "%" }, "interpretation": [{ "coding": [{ "code": "H" }] }], "effectiveDateTime": "2025-11-10" }},
+    { "resource": { "resourceType": "Observation", "status": "final", "code": { "coding": [{ "system": "http://loinc.org", "code": "8480-6", "display": "Systolic BP" }] }, "valueQuantity": { "value": 152, "unit": "mmHg" }, "interpretation": [{ "coding": [{ "code": "H" }] }], "effectiveDateTime": "2025-11-10" }},
+    { "resource": { "resourceType": "Observation", "status": "final", "code": { "coding": [{ "system": "http://loinc.org", "code": "8462-4", "display": "Diastolic BP" }] }, "valueQuantity": { "value": 94, "unit": "mmHg" }, "interpretation": [{ "coding": [{ "code": "H" }] }], "effectiveDateTime": "2025-11-10" }},
+    { "resource": { "resourceType": "Observation", "status": "final", "code": { "coding": [{ "system": "http://loinc.org", "code": "62238-1", "display": "eGFR" }] }, "valueQuantity": { "value": 38, "unit": "mL/min" }, "interpretation": [{ "coding": [{ "code": "L" }] }], "effectiveDateTime": "2025-10-05" }},
+    { "resource": { "resourceType": "Observation", "status": "final", "code": { "coding": [{ "system": "http://loinc.org", "code": "18262-6", "display": "LDL Cholesterol" }] }, "valueQuantity": { "value": 168, "unit": "mg/dL" }, "interpretation": [{ "coding": [{ "code": "H" }] }], "effectiveDateTime": "2025-10-05" }},
+    { "resource": { "resourceType": "MedicationRequest", "status": "stopped", "medicationCodeableConcept": { "coding": [{ "display": "Atorvastatin 40mg" }], "text": "Atorvastatin 40mg (statin)" }}},
+    { "resource": { "resourceType": "MedicationRequest", "status": "active", "medicationCodeableConcept": { "coding": [{ "display": "Metformin 1000mg" }], "text": "Metformin 1000mg" }}},
+    { "resource": { "resourceType": "MedicationRequest", "status": "active", "medicationCodeableConcept": { "coding": [{ "display": "Lisinopril 10mg" }], "text": "Lisinopril 10mg" }}},
+    { "resource": { "resourceType": "MedicationRequest", "status": "cancelled", "medicationCodeableConcept": { "coding": [{ "display": "Insulin Glargine" }], "text": "Insulin Glargine 100 units/mL" }}},
+    { "resource": { "resourceType": "Encounter", "class": { "code": "EMER" }, "period": { "start": "2025-08-14" }, "reasonCode": [{ "text": "Hyperglycemic episode" }] }},
+    { "resource": { "resourceType": "Encounter", "class": { "code": "EMER" }, "period": { "start": "2025-10-22" }, "reasonCode": [{ "text": "COPD exacerbation" }] }},
+    { "resource": { "resourceType": "Encounter", "class": { "code": "IMP"  }, "period": { "start": "2025-09-03" }, "reasonCode": [{ "text": "Acute COPD exacerbation" }] }},
+    { "resource": { "resourceType": "Encounter", "class": { "code": "AMB"  }, "period": { "start": "2025-11-10" }, "reasonCode": [{ "text": "Diabetes follow-up" }] }},
+    { "resource": { "resourceType": "Procedure", "status": "completed", "code": { "coding": [{ "system": "http://www.ama-assn.org/go/cpt", "code": "99213", "display": "Office Visit" }], "text": "Office Visit" }, "performedDateTime": "2025-11-10" }}
+  ]
+};
+
+// ── In-browser analysis engine (mirrors Spring Boot logic exactly) ─────
+function parseFhir(bundleJson) {
+  const bundle = JSON.parse(bundleJson);
+  const entries = (bundle.entry || []).map(e => e.resource).filter(Boolean);
+  const byType  = t => entries.filter(e => e.resourceType === t);
+  return {
+    patient:      entries.find(e => e.resourceType === 'Patient') || null,
+    conditions:   byType('Condition'),
+    observations: byType('Observation'),
+    medications:  byType('MedicationRequest'),
+    encounters:   byType('Encounter'),
+    procedures:   byType('Procedure')
+  };
+}
+
+function extractMember(p) {
+  if (!p) return { id: 'UNKNOWN', name: 'Unknown Member', age: 0, gender: 'unknown' };
+  const nameNode = p.name && p.name[0];
+  const given  = nameNode && nameNode.given ? nameNode.given[0] : '';
+  const family = nameNode ? nameNode.family : '';
+  const name   = [given, family].filter(Boolean).join(' ') || 'Unknown';
+  const dob    = p.birthDate || '';
+  const age    = dob ? (new Date().getFullYear() - parseInt(dob.split('-')[0])) : 0;
+  return { id: p.id || 'UNKNOWN', name, age, gender: p.gender || 'unknown', birthDate: dob };
+}
+
+function getIcd10(cond) {
+  const codings = cond.code && cond.code.coding || [];
+  for (const c of codings) {
+    if ((c.system || '').includes('icd') || (c.system || '').includes('ICD')) return c.code || '';
+  }
+  return codings[0] ? codings[0].code || '' : '';
+}
+
+function hasIcd10Prefix(conditions, prefix) {
+  return conditions.some(c => getIcd10(c).startsWith(prefix));
+}
+
+function getLoincValue(observations, loincCode) {
+  const matches = observations
+    .filter(o => (o.code && o.code.coding || []).some(c => c.code === loincCode))
+    .map(o => (o.valueQuantity && o.valueQuantity.value) || o.valueDecimal || 0)
+    .filter(v => v > 0);
+  return matches.length ? Math.max(...matches) : 0;
+}
+
+function isWithin12m(enc) {
+  try {
+    const start = (enc.period && enc.period.start) || '';
+    if (!start) return false;
+    const d = new Date(start.substring(0, 10));
+    return d >= new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
+  } catch { return false; }
+}
+
+function computeRisk(conditions, observations, encounters, medications) {
+  const CAP_C=8, CAP_E=4, CAP_I=3, CAP_L=6, CAP_M=120;
+  const W = { c:0.30, e:0.20, i:0.20, l:0.15, m:0.15 };
+
+  const icd10Cats = new Set(conditions.map(c => getIcd10(c).substring(0,3)).filter(Boolean));
+  const chronicN  = Math.min(icd10Cats.size, CAP_C);
+
+  const edN  = Math.min(encounters.filter(e => (e.class && e.class.code) === 'EMER' && isWithin12m(e)).length, CAP_E);
+  const ipN  = Math.min(encounters.filter(e => (e.class && e.class.code) === 'IMP'  && isWithin12m(e)).length, CAP_I);
+
+  const labsOOR = observations.filter(o => {
+    const interp = o.interpretation && o.interpretation[0] && o.interpretation[0].coding && o.interpretation[0].coding[0];
+    return interp && ['H','HH','L','LL'].includes(interp.code);
+  }).length;
+  const labN  = Math.min(labsOOR, CAP_L);
+
+  const medGapCount = medications.filter(m => ['stopped','cancelled','on-hold'].includes(m.status)).length;
+  const medGapDays  = Math.min(medGapCount * 30, CAP_M);
+
+  const score = W.c*(chronicN/CAP_C) + W.e*(edN/CAP_E) + W.i*(ipN/CAP_I) + W.l*(labN/CAP_L) + W.m*(medGapDays/CAP_M);
+  const rounded = Math.round(score * 100) / 100;
+  const tier = rounded >= 0.70 ? 'HIGH' : rounded >= 0.40 ? 'MEDIUM' : 'LOW';
+
+  return {
+    totalScore: rounded,
+    riskTier:   tier,
+    components: {
+      'Chronic Conditions':  { count: chronicN,   pct: Math.round(W.c*(chronicN/CAP_C)*100) },
+      'ED Visits (12m)':     { count: edN,         pct: Math.round(W.e*(edN/CAP_E)*100) },
+      'IP Admissions (12m)': { count: ipN,         pct: Math.round(W.i*(ipN/CAP_I)*100) },
+      'Labs Out-of-Range':   { count: labN,        pct: Math.round(W.l*(labN/CAP_L)*100) },
+      'Medication Gaps':     { count: medGapCount, pct: Math.round(W.m*(medGapDays/CAP_M)*100) }
+    },
+    chronicConditions: [...icd10Cats].sort()
+  };
+}
+
+function evaluateHedis(member, conditions, observations, medications, procedures, encounters) {
+  const age    = member.age;
+  const gender = (member.gender || '').toLowerCase();
+  const hasDM  = hasIcd10Prefix(conditions, 'E11');
+  const hasHTN = hasIcd10Prefix(conditions, 'I10');
+  const hba1c  = getLoincValue(observations, '4548-4');
+  const sysBP  = getLoincValue(observations, '8480-6');
+  const diaBP  = getLoincValue(observations, '8462-4');
+
+  const hasCPT = codes => procedures.some(p =>
+    (p.code && p.code.coding || []).some(c => codes.includes(c.code)));
+
+  const measures = [];
+
+  if (hasDM && age >= 18 && age <= 75) {
+    const ok = hba1c > 0 && hba1c < 8.0;
+    measures.push({ id:'CDC_HBA1C', name:'Diabetes: HbA1c Control (<8%)',
+      gap: ok ? 'CLOSED' : 'OPEN',
+      detail: hba1c > 0 ? `HbA1c: ${hba1c.toFixed(1)}%` : 'No HbA1c on file',
+      fhirSignal: 'LOINC 4548-4' });
+  }
+  if (hasDM && age >= 18 && age <= 75) {
+    const ok = sysBP > 0 && sysBP < 140 && diaBP < 90;
+    measures.push({ id:'CDC_BP', name:'Diabetes: BP Control (<140/90)',
+      gap: ok ? 'CLOSED' : 'OPEN',
+      detail: sysBP > 0 ? `BP: ${sysBP}/${diaBP} mmHg` : 'No BP on file',
+      fhirSignal: 'LOINC 8480-6 · 8462-4' });
+  }
+  if (hasHTN && age >= 18 && age <= 85) {
+    const ok = sysBP > 0 && sysBP < 140 && diaBP < 90;
+    measures.push({ id:'CBP', name:'Controlling High Blood Pressure',
+      gap: ok ? 'CLOSED' : 'OPEN',
+      detail: sysBP > 0 ? `BP: ${sysBP}/${diaBP} mmHg` : 'No BP on file',
+      fhirSignal: 'LOINC 8480-6 · 8462-4' });
+  }
+  if (age >= 45 && age <= 75) {
+    const ok = hasCPT(['45378','45380','45381','45382','45384','45385','82274','82270']);
+    measures.push({ id:'COL', name:'Colorectal Cancer Screening',
+      gap: ok ? 'CLOSED' : 'OPEN',
+      detail: ok ? 'Screening completed' : 'No colonoscopy or FIT stool test found',
+      fhirSignal: 'CPT 45378-85 · FIT 82274' });
+  }
+  if (gender === 'female' && age >= 50 && age <= 74) {
+    const ok = hasCPT(['77067','77066','77065']);
+    measures.push({ id:'BCS', name:'Breast Cancer Screening (Mammography)',
+      gap: ok ? 'CLOSED' : 'OPEN',
+      detail: ok ? 'Mammography completed' : 'No mammography found',
+      fhirSignal: 'CPT 77067 · 77066 · 77065' });
+  }
+  const hasStatinRx = medications.some(m => {
+    const txt = ((m.medicationCodeableConcept && m.medicationCodeableConcept.text) || '').toLowerCase();
+    return txt.includes('statin') || txt.includes('atorvastatin') || txt.includes('rosuvastatin');
+  });
+  if (hasStatinRx) {
+    const active = medications.some(m => {
+      const txt = ((m.medicationCodeableConcept && m.medicationCodeableConcept.text) || '').toLowerCase();
+      return (txt.includes('statin') || txt.includes('atorvastatin')) && m.status === 'active';
+    });
+    measures.push({ id:'MED_PDC', name:'Statin Medication Adherence (PDC ≥80%)',
+      gap: active ? 'CLOSED' : 'OPEN',
+      detail: active ? 'Active statin on file' : 'Statin gap — prescription stopped or cancelled',
+      fhirSignal: 'RxNorm statin concept codes' });
+  }
+  return measures;
+}
+
+function buildSummary(conditions, observations, medications, encounters) {
+  const activeConds = conditions
+    .filter(c => { const s = c.clinicalStatus && c.clinicalStatus.coding && c.clinicalStatus.coding[0]; return !s || s.code === 'active'; })
+    .map(c => (c.code && c.code.text) || (c.code && c.code.coding && c.code.coding[0] && c.code.coding[0].display) || 'Unknown');
+  const activeMeds = medications
+    .filter(m => m.status === 'active')
+    .map(m => (m.medicationCodeableConcept && m.medicationCodeableConcept.text) || 'Unknown');
+  const labs = {};
+  const hba1c = getLoincValue(observations, '4548-4');
+  const sysBP = getLoincValue(observations, '8480-6');
+  const diaBP = getLoincValue(observations, '8462-4');
+  if (hba1c) labs['HbA1c'] = `${hba1c.toFixed(1)}%`;
+  if (sysBP) labs['Blood Pressure'] = `${sysBP}/${diaBP} mmHg`;
+  return { activeConds, activeMeds, labs,
+    totalEncounters: encounters.length,
+    conditionCount: conditions.length,
+    medicationCount: medications.length };
+}
+
+// ── Run analysis (locally in browser) ────────────────────────────────
+function analyze() {
+  const input = document.getElementById('bundleInput').value.trim();
+  if (!input) { showError('Please paste a FHIR bundle or click "Load Sample"'); return; }
+
+  hideError();
+  showLoading(true);
+  document.getElementById('analyzeBtn').disabled = true;
+
+  // Small delay to show spinner
+  setTimeout(() => {
+    try {
+      const { patient, conditions, observations, medications, encounters, procedures } = parseFhir(input);
+      const member  = extractMember(patient);
+      const risk    = computeRisk(conditions, observations, encounters, medications);
+      const hedis   = evaluateHedis(member, conditions, observations, medications, procedures, encounters);
+      const summary = buildSummary(conditions, observations, medications, encounters);
+      renderResults(member, risk, hedis, summary);
+    } catch (e) {
+      showError('Invalid FHIR bundle: ' + e.message);
+    }
+    showLoading(false);
+    document.getElementById('analyzeBtn').disabled = false;
+  }, 600);
+}
+
+function loadSample() {
+  document.getElementById('bundleInput').value = JSON.stringify(SAMPLE_BUNDLE, null, 2);
+}
+
+// ── Render ────────────────────────────────────────────────────────────
+function renderResults(member, risk, hedis, summary) {
+  document.getElementById('placeholder').style.display = 'none';
+  const el = document.getElementById('results');
+  el.style.display = 'block';
+
+  const tierColor = risk.riskTier === 'HIGH' ? '#C0392B' : risk.riskTier === 'MEDIUM' ? '#E67E22' : '#27AE60';
+  const openGaps  = hedis.filter(h => h.gap === 'OPEN').length;
+
+  el.innerHTML = `
+    <!-- Member + Risk banner -->
+    <div class="member-card" style="margin-bottom:16px;">
+      <div style="flex:1;">
+        <div class="member-name">${member.name}</div>
+        <div class="member-meta">
+          <span>Age ${member.age}</span>
+          <span>${cap(member.gender)}</span>
+          <span>ID: ${member.id}</span>
+        </div>
+        <div class="score-section">
+          <div class="score-label">Risk Score: ${risk.totalScore.toFixed(2)} / 1.00</div>
+          <div class="score-bar-track">
+            <div class="score-bar-fill" style="width:${risk.totalScore*100}%;background:${tierColor};"></div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-left:20px; text-align:center;">
+        <div class="risk-badge risk-${risk.riskTier}">${risk.riskTier}</div>
+        <div style="color:rgba(255,255,255,0.7);font-size:11px;margin-top:6px;">Risk Tier</div>
+        <div style="color:${risk.riskTier==='HIGH'?'#FF8A7A':risk.riskTier==='MEDIUM'?'#FFD080':'#80EFB0'};font-size:13px;font-weight:700;margin-top:8px;">${openGaps} Open Gap${openGaps!==1?'s':''}</div>
+      </div>
+    </div>
+
+    <div class="results-grid">
+
+      <!-- Risk Components -->
+      <div class="panel">
+        <div class="panel-header"><div class="dot"></div>Risk Score Components</div>
+        <div class="panel-body">
+          ${Object.entries(risk.components).map(([label, val]) => `
+            <div class="component-row">
+              <div class="component-label">${label}</div>
+              <div class="component-bar-track"><div class="component-bar-fill" style="width:${Math.min(val.pct*3,100)}%;"></div></div>
+              <div class="component-val">${val.count}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Key Labs -->
+      <div class="panel">
+        <div class="panel-header"><div class="dot"></div>Key Clinical Values</div>
+        <div class="panel-body">
+          ${Object.entries(summary.labs).length > 0
+            ? Object.entries(summary.labs).map(([k,v]) => `
+              <div class="lab-row"><div class="lab-name">${k}</div><div class="lab-val">${v}</div></div>
+            `).join('')
+            : '<div style="color:#aaa;font-size:12px;">No lab values found in bundle</div>'
+          }
+          <div style="margin-top:12px; border-top:1px solid var(--gray); padding-top:12px;">
+            <div class="lab-row"><div class="lab-name">Total Encounters</div><div class="lab-val">${summary.totalEncounters}</div></div>
+            <div class="lab-row"><div class="lab-name">Active Conditions</div><div class="lab-val">${summary.conditionCount}</div></div>
+            <div class="lab-row"><div class="lab-name">Medications</div><div class="lab-val">${summary.medicationCount}</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HEDIS Measures — full width -->
+      <div class="panel results-full">
+        <div class="panel-header"><div class="dot"></div>HEDIS Quality Measures — ${new Date().getFullYear()}</div>
+        <div class="panel-body" style="padding:0;">
+          ${hedis.length === 0
+            ? '<div style="padding:20px;color:#aaa;font-size:13px;">No applicable HEDIS measures for this member.</div>'
+            : `<table class="hedis-table">
+              <thead><tr>
+                <th>Measure ID</th><th>Measure Name</th><th>Status</th><th>Detail</th><th>FHIR Signal</th>
+              </tr></thead>
+              <tbody>
+                ${hedis.map(h => `<tr>
+                  <td><span class="measure-id">${h.id}</span></td>
+                  <td style="font-weight:500;">${h.name}</td>
+                  <td><span class="${h.gap==='OPEN'?'gap-open':'gap-closed'}">${h.gap}</span></td>
+                  <td style="color:var(--graymd);font-size:12px;">${h.detail}</td>
+                  <td style="color:var(--graymd);font-size:11px;font-family:monospace;">${h.fhirSignal}</td>
+                </tr>`).join('')}
+              </tbody>
+            </table>`
+          }
+        </div>
+      </div>
+
+      <!-- Active Conditions -->
+      <div class="panel">
+        <div class="panel-header"><div class="dot"></div>Active Conditions</div>
+        <div class="panel-body">
+          <div class="pill-list">
+            ${summary.activeConds.map(c => `<span class="pill pill-condition">${c}</span>`).join('') || '<span style="color:#aaa;font-size:12px;">None found</span>'}
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Medications -->
+      <div class="panel">
+        <div class="panel-header"><div class="dot"></div>Active Medications</div>
+        <div class="panel-body">
+          <div class="pill-list">
+            ${summary.activeMeds.map(m => `<span class="pill pill-med">${m}</span>`).join('') || '<span style="color:#aaa;font-size:12px;">None found</span>'}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  `;
+}
+
+function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+function showLoading(v) { document.getElementById('statusLoading').style.display = v ? 'flex' : 'none'; }
+function showError(msg) { const el = document.getElementById('statusError'); el.style.display = 'block'; el.textContent = '⚠ ' + msg; }
+function hideError() { document.getElementById('statusError').style.display = 'none'; }
+</script>
+</body>
+</html>
